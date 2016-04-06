@@ -20,3 +20,7 @@ Git clone this repository, then:
 See the examples_templates directory for how to build a template.
 
     # stratosphere --project [GCP Project name] --env dev --action template ./templates/networks.py
+
+## License
+
+Apache 2.0 - See [LICENSE](LICENSE) for more information.
