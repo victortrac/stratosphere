@@ -1,8 +1,17 @@
-from resources import BaseGCPResource
+from resources import GCPResource
+from compute_properties import InstanceTemplateProperty
 
 
-class Network(BaseGCPResource):
-    resource_type = "compute.v1.network"
+class InstanceTemplate(GCPResource):
+    resource_type = 'compute.v1.instanceTemplate'
+    props = {
+        'description': (basestring, False),
+        'properties': (InstanceTemplateProperty, True),
+    }
+
+
+class Network(GCPResource):
+    resource_type = 'compute.v1.network'
     props = {
         'IPv4Range': (basestring, False),
         'autoCreateSubnetworks': (bool, False),
@@ -11,7 +20,7 @@ class Network(BaseGCPResource):
     }
 
 
-class Subnetwork(BaseGCPResource):
+class Subnetwork(GCPResource):
     resource_type = 'compute.v1.subnetworks'
     props = {
         'description': (basestring, False),
