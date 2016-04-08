@@ -19,7 +19,7 @@ You'll need to get a valid OAuth auth JSON file to interact with the GCP DM API.
 easily done by just installing the [GCP API Client Library for Python](https://developers.google.com/api-client-library/python/start/get_started#setup).
 
 ## Examples
-See the [example_templates](example_templaates) directory for how to build a template.
+See the [example_templates](example_templates) directory for how to build a template.
 
     $ stratosphere --project [MyGCPProject] --env dev --action template ./example_templates/networks.py
     resources:
