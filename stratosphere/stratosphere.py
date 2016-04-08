@@ -1,5 +1,5 @@
 import datetime
-import imp
+import importlib
 import inspect
 import os
 import sys
@@ -11,7 +11,6 @@ from oauth2client.client import GoogleCredentials
 
 from resources import Template
 
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
 
 credentials = GoogleCredentials.get_application_default()
 dm = discovery.build('deploymentmanager', 'v2', credentials=credentials)
@@ -69,7 +68,7 @@ def load_template_module(module_path):
             path, filename = os.path.split(os.path.abspath(module_path))
             module_name = filename.split('.')[0].lower()
             sys.path.append(os.path.dirname(module_path))
-            module = imp.load_source(module_name, module_path)
+            module = importlib.import_module(module_name)
             # Discover what the template class is from a template module.
             template_class = [r[1] for r in inspect.getmembers(module, inspect.isclass)
                               if r[0] != 'Template' and issubclass(r[1], Template)][0]
