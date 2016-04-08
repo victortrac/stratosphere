@@ -116,3 +116,13 @@ class InstanceTemplateProperty(GCPProperty):
                     raise ValueError('{} - Boot disks must have initializeParams!'.format(disk))
         if not boot_count == 1:
             raise ValueError('{} - One disk must be marked as bootable!'.format(self.__class__))
+
+    def update(self, current_deployment):
+        # Updates to InstanceTemplates require setting a fingerprint from the current deployment
+        metadataProperty = self.properties.get('metadata', None)
+        if metadataProperty:
+            metadataProperty.properties['fingerprint'] = current_deployment.get('fingerprint')
+        else:
+            self.properties['metadata'] = InstanceTemplateMetadataProperty(
+                fingerprint=str(current_deployment.get('fingerprint'))
+            )
