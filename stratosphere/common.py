@@ -22,6 +22,7 @@ class ResourceValidators(object):
         return ResourceValidators.regex_match('^[a-z][-a-z0-9]{0,57}$', name)
 
 
+
 class ResourceNames(object):
     """
     Provides some helper functions to consistently name things
@@ -31,15 +32,13 @@ class ResourceNames(object):
         self.env = env
 
     @property
-    def network(self):
+    def networkName(self):
         return '{}-network'.format(self.env)
 
-    @property
-    def subnetwork(self, zone):
+    def subnetworkName(self, zone):
         return '{}-{}-subnetwork'.format(self.env, zone)
 
-    @property
-    def ZoneToRegion(zone):
+    def zone_to_region(self, zone):
         """Derives the region from a zone name."""
         parts = zone.split('-')
         if len(parts) != 3:
