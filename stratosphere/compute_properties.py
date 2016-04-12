@@ -167,3 +167,23 @@ class InstanceGroupNamedPort(GCPProperty):
         'name': (basestring, True),
         'port': (int, True)
     }
+
+
+class FirewallAllowedPorts(GCPProperty):
+    TCP = 'tcp'
+    UDP = 'udp'
+    ICMP = 'icmp'
+    ESP = 'esp'
+    AH = 'ah'
+    SCTP = 'sctp'
+    ALLOWED_PROTOCOLS = [TCP, UDP, ICMP, ESP, AH, SCTP]
+
+    props = {
+        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
+        'ports': ([basestring], False)
+    }
+
+    def validator(self):
+        if self.properties.get('IPProtocol') in (self.TCP, self.UDP):
+            if not self.properties.get('ports'):
+                raise ValueError('Ports must be defined for TCP or UDP firewall rules')

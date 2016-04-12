@@ -91,6 +91,25 @@ class BaseGCPResource(object):
                                                                   value,
                                                                   allowed_values))
 
+    def _toObject(self):
+        if self.isValid():
+            _object = {}
+            for k, v in self.properties.items():
+                if isinstance(v, list):
+                    v2 = []
+                    for item in v:
+                        if isinstance(item, GCPProperty):
+                            v2.append(item.asObject())
+                        else:
+                            v2.append(item)
+                    v = v2
+                if isinstance(v, GCPProperty):
+                    _object[k] = v.asObject()
+                else:
+                    _object[k] = v
+            return _object
+
+
     def isValid(self):
         if isinstance(self, GCPResource) and not hasattr(self, 'resource_type'):
             raise ValueError("Resource {} requires a resource_type.".format(self.name))
@@ -109,37 +128,14 @@ class BaseGCPResource(object):
 
 class GCPResource(BaseGCPResource):
     def asObject(self):
-        if self.isValid():
-            properties = {}
-            for property, value in self.properties.items():
-                if isinstance(value, GCPProperty):
-                    properties[property] = value.asObject()
-                else:
-                    properties[property] = value
-
-            return {
-                'type': self.resource_type,
-                'name': self.name,
-                'properties': properties
-            }
+        return {
+            'type': self.resource_type,
+            'name': self.name,
+            'properties': self._toObject()
+        }
 
 
 class GCPProperty(BaseGCPResource):
     def asObject(self):
-        if self.isValid():
-            _object = {}
-            for k, v in self.properties.items():
-                if isinstance(v, list):
-                    v2 = []
-                    for item in v:
-                        if isinstance(item, GCPProperty):
-                            v2.append(item.asObject())
-                        else:
-                            v2.append(item)
-                    v = v2
-                if isinstance(v, GCPProperty):
-                    _object[k] = v.asObject()
-                else:
-                    _object[k] = v
-            return _object
+        return self._toObject()
 
