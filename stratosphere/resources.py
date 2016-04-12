@@ -1,10 +1,12 @@
+import hashlib
+import inspect
 import yaml
-import re
 
 class Template(object):
     TEMPLATE_TYPE = 'UNDEFINED'  # Need to override this in subclasses
 
-    def __init__(self, env):
+    def __init__(self, project, env):
+        self.project = project
         self.env = env
         self._name = "{}-{}".format(env, self.TEMPLATE_TYPE)
         self.resources = []
@@ -31,25 +33,37 @@ class Template(object):
 
 
 class BaseGCPResource(object):
-    NAME_REGEX = re.compile('(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)')
-
-    def __init__(self, name, **kwargs):
-        self.name = name
+    def __init__(self, **kwargs):
         self.properties = {}
         for k, v in kwargs.items():
             self._set_property(k, v)
+
+    @property
+    def name(self):
+        return self.properties.get('name')
+
+    @property
+    def Ref(self):
+        return unicode('$(ref.{}.selfLink)'.format(self.name))
+
+    def __hash__(self):
+        hasher = hashlib.md5()
+        hasher.update(unicode(self.asObject()))
+        return hasher.hexdigest()
 
     def _set_property(self, key, value):
         if key not in self.props.keys():
             type_name = getattr(self, 'resource_type', self.__class__.__name__)
             raise AttributeError('{} object does not support attribute {}'.format(type_name, key))
-
         expected_type = self.props[key][0]
         if len(self.props[key]) == 3:
-            expected_values = self.props[key][2]
-            if value not in expected_values:
-                self._raise_value(key, value, expected_values)
-
+            allowed_values = self.props[key][2]
+            if hasattr(allowed_values, '__call__'):
+                # allowed_values is a validator function
+                if not allowed_values(value):
+                    self._raise_value(key, value, allowed_values)
+            elif value not in allowed_values:
+                self._raise_value(key, value, allowed_values)
         if isinstance(expected_type, list):
             if not isinstance(value, list):
                 self._raise_type(key, value, expected_type)
@@ -62,7 +76,6 @@ class BaseGCPResource(object):
         else:
             self._raise_type(key, value, expected_type)
 
-
     def _raise_type(self, key, value, expected_type):
         raise TypeError("{}: {}.{} is {}, expected {}".format(self.__class__,
                                                               self.name,
@@ -70,14 +83,13 @@ class BaseGCPResource(object):
                                                               type(value),
                                                               expected_type))
 
-    def _raise_value(self, key, value, expected_values):
+    def _raise_value(self, key, value, allowed_values):
+        if hasattr(allowed_values, '__call__'):
+            allowed_values = 'defined in function:\n{}'.format(inspect.getsource(allowed_values))
         raise TypeError("{}: {} is {}, expected values {}".format(self.__class__,
-                                                              key,
-                                                              value,
-                                                              expected_values))
-
-    def getRef(self):
-        return unicode('$(ref.{}.selfLink)'.format(self.name))
+                                                                  key,
+                                                                  value,
+                                                                  allowed_values))
 
     def isValid(self):
         if isinstance(self, GCPResource) and not hasattr(self, 'resource_type'):
@@ -95,13 +107,7 @@ class BaseGCPResource(object):
         return True
 
 
-
 class GCPResource(BaseGCPResource):
-    def __init__(self, name, **kwargs):
-        if not self.NAME_REGEX.match(name):
-            raise ValueError('{}: Invalid resource name: {}. Must match {}'.format(self.__class__, name, self.NAME_REGEX.pattern))
-        super(GCPResource, self).__init__(name, **kwargs)
-
     def asObject(self):
         if self.isValid():
             properties = {}
@@ -119,9 +125,6 @@ class GCPResource(BaseGCPResource):
 
 
 class GCPProperty(BaseGCPResource):
-    def __init__(self, name=None, **kwargs):
-        super(GCPProperty, self).__init__(name, **kwargs)
-
     def asObject(self):
         if self.isValid():
             _object = {}

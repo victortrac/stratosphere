@@ -2,19 +2,17 @@ import datetime
 import importlib
 import inspect
 import os
+import pprint
 import sys
 import time
 
 import click
-from googleapiclient import discovery, errors
-from oauth2client.client import GoogleCredentials
+from googleapiclient import errors
 
 from resources import Template
+from utils import get_google_auth
 
-
-credentials = GoogleCredentials.get_application_default()
-dm = discovery.build('deploymentmanager', 'v2', credentials=credentials)
-
+dm = get_google_auth('deploymentmanager', 'v2')
 
 def get_deployment(project, deployment):
     try:
@@ -29,16 +27,15 @@ def get_deployment(project, deployment):
 def wait_for_completion(project, result):
     print('Waiting for deployment {}...'.format(result['name']))
     last_event = result
-    failed = False
     while not last_event['status'] in ['DONE', ]:
         time.sleep(1)
         last_event = dm.operations().get(project=project, operation=last_event['name']).execute()
         print('{} Operation: {name}, TargetLink: {targetLink}, Progress: {progress}, Status: {status}'.
               format(datetime.datetime.now().isoformat(), **last_event))
-        if last_event['status'] == 'Failed':
-            failed = True
-    if failed:
+    if len(last_event.get('error', [])):
         print('*** Stack apply failed! ***')
+        pprint.pprint(last_event)
+        sys.exit(1)
     else:
         print('Stack action complete.')
 
@@ -94,7 +91,7 @@ def load_template_module(module_path):
 def main(project, env, action, template_path):
     if action in ['apply', 'template']:
         template_class = load_template_module(template_path)
-        template = template_class(env)
+        template = template_class(project, env)
         if action == 'apply':
             template.__repr__()
             apply_deployment(project, template)

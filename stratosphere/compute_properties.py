@@ -1,6 +1,42 @@
 from resources import GCPProperty
 
 
+class AutoscalingPolicyCpuUtilization(GCPProperty):
+    props = {
+        'utilizationTarget': (float, False)
+    }
+
+
+class AutoscalingPolicyCustomMetricUtilizations(GCPProperty):
+    UTILIZATION_TARGET_TYPE = ['GAUGE', 'DELTA_PER_SECOND', 'DELTA_PER_MINUTE']
+
+    props = {
+        'metric': (basestring, True),
+        'utilizationTarget': (float, False),
+        'utilizationTargetType': (basestring, False, UTILIZATION_TARGET_TYPE),
+    }
+
+
+class AutoscalingPolicyLoadBalancingUtilization(GCPProperty):
+    props = {
+        'utilizationTarget': (float, False)
+    }
+
+
+class AutoscalingPolicy(GCPProperty):
+    props = {
+        'coolDownPeriodSec': (int, False),  # Defaults to 60s
+        'cpuUtilization': (AutoscalingPolicyCpuUtilization, False),
+        'customMetricUtilizations': ([AutoscalingPolicyCustomMetricUtilizations], False),
+        'loadBalancingUtilization': (AutoscalingPolicyLoadBalancingUtilization, False),
+        'maxNumReplicas': (int, True),
+        'minNumReplicas': (int, False),
+        'description': (basestring, False),
+        'name': (basestring, True),
+        'target': (basestring, True)  # URL
+    }
+
+
 class MetadataProperty(GCPProperty):
     props = {
         'key': (basestring, True),
@@ -20,7 +56,6 @@ class InstanceTemplateDiskInitializeParamsProperty(GCPProperty):
 class InstanceTemplateDisksProperty(GCPProperty):
     SCRATCH = 'SCRATCH'
     PERSISTENT = 'PERSISTENT'
-
     VALID_TYPES = [SCRATCH, PERSISTENT]
 
     props = {
@@ -41,7 +76,6 @@ class InstanceTemplateMetadataProperty(GCPProperty):
         'fingerprint': (bytes, False),
         'items': ([MetadataProperty, ], False)
     }
-
 
 
 class InstanceTemplateNetworkInterfaceAccessConfigProperty(GCPProperty):
@@ -117,12 +151,19 @@ class InstanceTemplateProperty(GCPProperty):
         if not boot_count == 1:
             raise ValueError('{} - One disk must be marked as bootable!'.format(self.__class__))
 
-    def update(self, current_deployment):
-        # Updates to InstanceTemplates require setting a fingerprint from the current deployment
-        metadataProperty = self.properties.get('metadata', None)
-        if metadataProperty:
-            metadataProperty.properties['fingerprint'] = current_deployment.get('fingerprint')
-        else:
-            self.properties['metadata'] = InstanceTemplateMetadataProperty(
-                fingerprint=str(current_deployment.get('fingerprint'))
-            )
+    # def update(self, current_deployment):
+        # # Updates to InstanceTemplates require setting a fingerprint from the current deployment
+        # metadataProperty = self.properties.get('metadata', None)
+        # if metadataProperty:
+        #     metadataProperty.properties['fingerprint'] = current_deployment.get('fingerprint')
+        # else:
+        #     self.properties['metadata'] = InstanceTemplateMetadataProperty(
+        #         fingerprint=str(current_deployment.get('fingerprint'))
+        #     )
+
+
+class InstanceGroupNamedPort(GCPProperty):
+    props = {
+        'name': (basestring, True),
+        'port': (int, True)
+    }
