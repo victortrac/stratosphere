@@ -1,6 +1,7 @@
 from common import ResourceValidators
 from resources import GCPResource
-from compute_properties import InstanceTemplateProperty, InstanceGroupNamedPort, AutoscalingPolicy
+from compute_properties import InstanceTemplateProperty, InstanceGroupNamedPort, AutoscalingPolicy, \
+    FirewallAllowedPorts
 
 
 class Autoscaler(GCPResource):
@@ -87,6 +88,23 @@ class Subnetwork(GCPResource):
         'name': (basestring, True, ResourceValidators.name),
         'network': (basestring, True)
     }
+
+
+class Firewall(GCPResource):
+    resource_type = 'compute.v1.firewall'
+    props = {
+        'name': (basestring, True),
+        'allowed': ([FirewallAllowedPorts], True),
+        'description': (basestring, False),
+        'network': (basestring, True),
+        'sourceRanges': ([basestring], False),
+        'sourceTags': ([basestring], False),
+        'targetTags': ([basestring], False)
+    }
+
+    def validator(self):
+        if not self.properties.get('sourceRanges') and not self.properties.get('sourceTags'):
+            raise ValueError('Either sourceRanges or sourceTags must be defined')
 
 
 class VpnTunnel(GCPResource):
