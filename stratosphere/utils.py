@@ -17,13 +17,17 @@ def get_latest_image(project, name):
     dm = get_google_auth('compute', 'v1')
     result = dm.images().list(project=project).execute()
     newest_image = None
-    for image in result.get('items'):
+    for image in result.get('items', []):
         if image['name'].find(name):
             if not newest_image:
                 newest_image = image
             else:
                 if image['creationTimestamp'] > newest_image['creationTimestamp']:
                     newest_image = image
+
+    if not newest_image:
+        raise KeyError("No images found for {}/{}".format(project, name))
+    
     return newest_image
 
 
@@ -31,7 +35,7 @@ def load_startup_script(path, replacements=None):
     '''
     Loads a startup-script from disk
 
-    path (str): A path to the scrtip file
+    path (str): A path to the script file
     replacements (tuple): A tuple of string replacements to run on the file, if supplied.
                           Formatted like: ((string1, string2, count), (string3, string4, count) where
                           count is the number of replacements to make for that pattern
