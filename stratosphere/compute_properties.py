@@ -46,10 +46,15 @@ class MetadataProperty(GCPProperty):
 
 
 class InstanceTemplateDiskInitializeParamsProperty(GCPProperty):
+    LOCAL = 'local-ssd'
+    SSD = 'pd-ssd'
+    STANDARD = 'pd-standard'
+    DISK_TYPES = [LOCAL, SSD, STANDARD]
+
     props = {
         'diskName': (basestring, False),
         'diskSizeGb': (int, True),
-        'diskType': (basestring, True),
+        'diskType': (basestring, True, DISK_TYPES),
         'sourceImage': (basestring, False)
     }
 
@@ -71,10 +76,16 @@ class InstanceTemplateDisksProperty(GCPProperty):
     }
 
     def validator(self):
-        if self.properties['boot'] == True:
-            # Boot disks require an initializeParams property
-            if not isinstance(self.properties['initializeParams'], InstanceTemplateDiskInitializeParamsProperty):
-                raise ValueError('Boot disks require a initializeParams property')
+        # Must provide initializeParams or source, not both
+        if not (bool(self.properties.get('initializeParams')) != bool(self.properties.get('source'))):
+            raise ValueError('Must provide initializeParams or source, not both.')
+        if self.properties.get('boot', False) == True:
+            # Boot disks require an initializeParams or source property
+            return True
+        else:
+            # non-boot disks can't have an initializeParams property
+            if self.properties.get('initializeParams'):
+                raise ValueError('Non-boot disks should not have an initializeParams property')
 
 
 class InstanceTemplateMetadataProperty(GCPProperty):
