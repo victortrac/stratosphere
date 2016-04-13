@@ -53,8 +53,8 @@ def load_startup_script(path, replacements=None):
             to_string = str(replacement[1])
             if len(replacement) == 3:
                 max = replacement[2]
-                script.replace(from_string, to_string, max)
+                script = script.replace(from_string, to_string, max)
             else:
-                script.replace(from_string, to_string)
+                script = script.replace(from_string, to_string)
 
     return script
