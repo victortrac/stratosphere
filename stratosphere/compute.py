@@ -23,7 +23,7 @@ class InstanceGroup(GCPResource):
     resource_type = 'compute.v1.instanceGroup'
     props = {
         'description': (basestring, False),
-        'name': (basestring, True),
+        'name': (basestring, True, ResourceValidators.name),
         'namedPorts': ([InstanceGroupNamedPort], False),
         'network': (basestring, True),  # URL
         'subnetwork': (basestring, False)  # URL
@@ -36,11 +36,25 @@ class InstanceGroupManager(GCPResource):
         'baseInstanceName': (basestring, True, ResourceValidators.base_instance_name),
         'description': (basestring, False),
         'instanceTemplate': (basestring, True),  # URL
-        'name': (basestring, True),
+        'name': (basestring, True, ResourceValidators.name),
         'namedPorts': ([InstanceGroupNamedPort], False),
         'targetPools': ([TargetPool], False),
         'targetSize': (int, True),
         'zone': (basestring, True, ResourceValidators.zone)
+    }
+
+
+class RegionInstanceGroupManager(GCPResource):
+    resource_type = 'compute.alpha.regionInstanceGroupManagers'
+    props = {
+        'baseInstanceName': (basestring, True, ResourceValidators.base_instance_name),
+        'description': (basestring, False),
+        'instanceTemplate': (basestring, True),  # URL
+        'name': (basestring, True, ResourceValidators.name),
+        'namedPorts': ([InstanceGroupNamedPort], False),
+        'targetPools': ([TargetPool], False),
+        'targetSize': (int, True),
+        'zone': (basestring, False, ResourceValidators.zone)
     }
 
 
@@ -60,7 +74,7 @@ class Network(GCPResource):
         'autoCreateSubnetworks': (bool, False),
         'description': (basestring, False),
         'gatewayIPv4': (basestring, False),
-        'name': (basestring, True),
+        'name': (basestring, True, ResourceValidators.name),
     }
 
 
@@ -69,7 +83,21 @@ class Subnetwork(GCPResource):
     props = {
         'description': (basestring, False),
         'region': (basestring, True),
-        'ipCidrRange': (basestring, True),
-        'name': (basestring, True),
+        'ipCidrRange': (basestring, True, ResourceValidators.ipAddress),
+        'name': (basestring, True, ResourceValidators.name),
         'network': (basestring, True)
+    }
+
+
+class VpnTunnel(GCPResource):
+    resource_type = 'compute.v1.vpnTunnel'
+    props = {
+        'description': (basestring, False),
+        'ikeVersion': (int, False, [1, 2]),
+        'localTrafficSelector': ([basestring], True, ResourceValidators.ipAddress),
+        'name': (basestring, True, ResourceValidators.name),
+        'peerIp': (basestring, True, ResourceValidators.ipAddress),
+        'sharedSecret': (basestring, True),
+        'sharedSecretHash': (basestring, False),
+        'targetVpnGateway': (basestring, False)  # URL
     }

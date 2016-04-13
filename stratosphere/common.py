@@ -1,5 +1,5 @@
 import re
-
+from netaddr import IPNetwork
 
 class ResourceValidators(object):
     @classmethod
@@ -21,6 +21,13 @@ class ResourceValidators(object):
     def base_instance_name(name):
         return ResourceValidators.regex_match('^[a-z][-a-z0-9]{0,57}$', name)
 
+    @staticmethod
+    def ipAddress(network):
+        try:
+            IPNetwork(network)
+            return True
+        except:
+            raise ValueError('Invalid CIDR - {}'.format(network))
 
 
 class ResourceNames(object):

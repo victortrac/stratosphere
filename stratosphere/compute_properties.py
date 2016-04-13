@@ -1,3 +1,4 @@
+from common import ResourceValidators
 from resources import GCPProperty
 
 
@@ -32,7 +33,7 @@ class AutoscalingPolicy(GCPProperty):
         'maxNumReplicas': (int, True),
         'minNumReplicas': (int, False),
         'description': (basestring, False),
-        'name': (basestring, True),
+        'name': (basestring, True, ResourceValidators.name),
         'target': (basestring, True)  # URL
     }
 
@@ -57,18 +58,27 @@ class InstanceTemplateDisksProperty(GCPProperty):
     SCRATCH = 'SCRATCH'
     PERSISTENT = 'PERSISTENT'
     VALID_TYPES = [SCRATCH, PERSISTENT]
-
     props = {
         'autoDelete': (bool, False),
         'boot': (bool, True),
         'deviceName': (basestring, False),
         'index': (int, False),
-        'initializeParams': (InstanceTemplateDiskInitializeParamsProperty, True),
+        'initializeParams': (InstanceTemplateDiskInitializeParamsProperty, False),
         'interface': (basestring, False),
         'mode': (basestring, False),
         'source': (basestring, False),
         'type': (basestring, True, VALID_TYPES)
     }
+
+    def validator(self):
+        if self.properties['boot'] == True:
+            # Boot disks require an initializeParams property
+            if not isinstance(self.properties['initializeParams'], InstanceTemplateDiskInitializeParamsProperty):
+                raise ValueError('Boot disks require a initializeParams property')
+        else:
+            # non-boot disks can't have an initializeParams property
+            if self.properties.get('initializeParams'):
+                raise ValueError('Non-boot disks should not have an initializeParams property')
 
 
 class InstanceTemplateMetadataProperty(GCPProperty):
@@ -83,7 +93,7 @@ class InstanceTemplateNetworkInterfaceAccessConfigProperty(GCPProperty):
     VALID_TYPES = [ONE_TO_ONE_NAT, ]
 
     props = {
-        'name': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
         'natIP': (basestring, False),
         'type': (basestring, True, VALID_TYPES)
     }
@@ -92,10 +102,13 @@ class InstanceTemplateNetworkInterfaceAccessConfigProperty(GCPProperty):
 class InstanceTemplateNetworkInterfaceProperty(GCPProperty):
     props = {
         'accessConfigs': ([InstanceTemplateNetworkInterfaceAccessConfigProperty], True),
-        'network': (basestring, True),  # URL of network
+        'network': (basestring, False),  # URL of network
         'subnetwork': (basestring, False),  # URL of subnetwork
     }
 
+    def validator(self):
+        if self.properties.get('network') and not self.properties.get('subnetwork'):
+            raise ValueError('A custom network requires a subnetwork')
 
 class InstanceTemplateSchedulingProperty(GCPProperty):
     MIGRATE = 'MIGRATE'
@@ -151,20 +164,10 @@ class InstanceTemplateProperty(GCPProperty):
         if not boot_count == 1:
             raise ValueError('{} - One disk must be marked as bootable!'.format(self.__class__))
 
-    # def update(self, current_deployment):
-        # # Updates to InstanceTemplates require setting a fingerprint from the current deployment
-        # metadataProperty = self.properties.get('metadata', None)
-        # if metadataProperty:
-        #     metadataProperty.properties['fingerprint'] = current_deployment.get('fingerprint')
-        # else:
-        #     self.properties['metadata'] = InstanceTemplateMetadataProperty(
-        #         fingerprint=str(current_deployment.get('fingerprint'))
-        #     )
-
 
 class InstanceGroupNamedPort(GCPProperty):
     props = {
-        'name': (basestring, True),
+        'name': (basestring, True, ResourceValidators.name),
         'port': (int, True)
     }
 
