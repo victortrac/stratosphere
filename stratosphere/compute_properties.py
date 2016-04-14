@@ -93,7 +93,7 @@ class InstanceTemplateNetworkInterfaceAccessConfigProperty(GCPProperty):
     VALID_TYPES = [ONE_TO_ONE_NAT, ]
 
     props = {
-        'name': (basestring, True, ResourceValidators.name),
+        'name': (basestring, True),
         'natIP': (basestring, False),
         'type': (basestring, True, VALID_TYPES)
     }
@@ -125,7 +125,7 @@ class InstanceTemplateSchedulingProperty(GCPProperty):
 class InstanceTemplateServiceAccountsProperty(GCPProperty):
     props = {
         'email': (basestring, False),
-        'scopes': ([basestring], False)
+        'scopes': ([basestring], True)
     }
 
 

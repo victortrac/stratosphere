@@ -18,7 +18,7 @@ def get_latest_image(project, name):
     result = dm.images().list(project=project).execute()
     newest_image = None
     for image in result.get('items', []):
-        if image['name'].find(name):
+        if image['name'].find(name) != -1:
             if not newest_image:
                 newest_image = image
             else:
@@ -27,7 +27,7 @@ def get_latest_image(project, name):
 
     if not newest_image:
         raise KeyError("No images found for {}/{}".format(project, name))
-    
+
     return newest_image
 
 
