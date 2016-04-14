@@ -1,6 +1,8 @@
 import re
 from netaddr import IPNetwork
 
+from utils import get_google_auth
+
 class ResourceValidators(object):
     @classmethod
     def regex_match(cls, regex, string):
@@ -28,6 +30,10 @@ class ResourceValidators(object):
             return True
         except:
             raise ValueError('Invalid CIDR - {}'.format(network))
+
+    @staticmethod
+    def is_valid_machine_type(project, zone, _type):
+        pass
 
 
 class ResourceNames(object):

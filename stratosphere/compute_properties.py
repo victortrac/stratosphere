@@ -38,6 +38,26 @@ class AutoscalingPolicy(GCPProperty):
     }
 
 
+class FirewallAllowedPorts(GCPProperty):
+    TCP = 'tcp'
+    UDP = 'udp'
+    ICMP = 'icmp'
+    ESP = 'esp'
+    AH = 'ah'
+    SCTP = 'sctp'
+    ALLOWED_PROTOCOLS = [TCP, UDP, ICMP, ESP, AH, SCTP]
+
+    props = {
+        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
+        'ports': ([basestring], False)
+    }
+
+    def validator(self):
+        if self.properties.get('IPProtocol') in (self.TCP, self.UDP):
+            if not self.properties.get('ports'):
+                raise ValueError('Ports must be defined for TCP or UDP firewall rules')
+
+
 class MetadataProperty(GCPProperty):
     props = {
         'key': (basestring, True),
@@ -54,7 +74,7 @@ class InstanceTemplateDiskInitializeParamsProperty(GCPProperty):
     props = {
         'diskName': (basestring, False),
         'diskSizeGb': (int, True),
-        'diskType': (basestring, True, DISK_TYPES),
+        'diskType': (basestring, False, DISK_TYPES),
         'sourceImage': (basestring, False)
     }
 
@@ -149,7 +169,7 @@ class InstanceTemplateProperty(GCPProperty):
         'description': (basestring, False),
         'canIpForward': (bool, False),
         'disks': ([InstanceTemplateDisksProperty], True),
-        'machineType': (basestring, True),
+        'machineType': (basestring, True),  # ResourceValidators.is_valid_machine_type),
         'metadata': (InstanceTemplateMetadataProperty, False),
         'networkInterfaces': ([InstanceTemplateNetworkInterfaceProperty], True),
         'scheduling': (InstanceTemplateSchedulingProperty, False),
@@ -180,21 +200,3 @@ class InstanceGroupNamedPort(GCPProperty):
     }
 
 
-class FirewallAllowedPorts(GCPProperty):
-    TCP = 'tcp'
-    UDP = 'udp'
-    ICMP = 'icmp'
-    ESP = 'esp'
-    AH = 'ah'
-    SCTP = 'sctp'
-    ALLOWED_PROTOCOLS = [TCP, UDP, ICMP, ESP, AH, SCTP]
-
-    props = {
-        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
-        'ports': ([basestring], False)
-    }
-
-    def validator(self):
-        if self.properties.get('IPProtocol') in (self.TCP, self.UDP):
-            if not self.properties.get('ports'):
-                raise ValueError('Ports must be defined for TCP or UDP firewall rules')

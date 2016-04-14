@@ -4,10 +4,22 @@ from compute_properties import InstanceTemplateProperty, InstanceGroupNamedPort,
     FirewallAllowedPorts
 
 
-class Autoscaler(GCPResource):
-    POLICY_TYPES = ['cpuUtilization', 'customMetricUtilizations', 'loadBalancingUtilization']
+class Address(GCPResource):
+    '''
+    A Regional Reserved IP Address
+    '''
+    resource_type = 'compute.v1.address'
+    props = {
+        'description': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
+        'region': (basestring, True)
+    }
 
+
+class Autoscaler(GCPResource):
     resource_type = 'compute#autoscaler'
+
+    POLICY_TYPES = ['cpuUtilization', 'customMetricUtilizations', 'loadBalancingUtilization']
     props = {
         'autoscalingPolicy': (AutoscalingPolicy, False),
         'description': (basestring, False),
@@ -16,8 +28,21 @@ class Autoscaler(GCPResource):
     }
 
 
-class TargetPool(GCPResource):
-    pass
+class Firewall(GCPResource):
+    resource_type = 'compute.v1.firewall'
+    props = {
+        'name': (basestring, True),
+        'allowed': ([FirewallAllowedPorts], True),
+        'description': (basestring, False),
+        'network': (basestring, True),
+        'sourceRanges': ([basestring], False),
+        'sourceTags': ([basestring], False),
+        'targetTags': ([basestring], False)
+    }
+
+    def validator(self):
+        if not (bool(self.properties.get('sourceRanges')) != bool(self.properties.get('sourceTags'))):
+            raise ValueError('Either sourceRanges or sourceTags must be defined')
 
 
 class InstanceGroup(GCPResource):
@@ -31,6 +56,10 @@ class InstanceGroup(GCPResource):
     }
 
 
+class TargetPool(GCPResource):
+    pass
+
+
 class InstanceGroupManager(GCPResource):
     resource_type = 'compute.v1.instanceGroupManager'
     props = {
@@ -42,20 +71,6 @@ class InstanceGroupManager(GCPResource):
         'targetPools': ([TargetPool], False),
         'targetSize': (int, True),
         'zone': (basestring, True, ResourceValidators.zone)
-    }
-
-
-class RegionInstanceGroupManager(GCPResource):
-    resource_type = 'compute.alpha.regionInstanceGroupManagers'
-    props = {
-        'baseInstanceName': (basestring, True, ResourceValidators.base_instance_name),
-        'description': (basestring, False),
-        'instanceTemplate': (basestring, True),  # URL
-        'name': (basestring, True, ResourceValidators.name),
-        'namedPorts': ([InstanceGroupNamedPort], False),
-        'targetPools': ([TargetPool], False),
-        'targetSize': (int, True),
-        'zone': (basestring, False, ResourceValidators.zone)
     }
 
 
@@ -79,6 +94,43 @@ class Network(GCPResource):
     }
 
 
+class RegionInstanceGroupManager(GCPResource):
+    resource_type = 'compute.alpha.regionInstanceGroupManagers'
+    props = {
+        'baseInstanceName': (basestring, True, ResourceValidators.base_instance_name),
+        'description': (basestring, False),
+        'instanceTemplate': (basestring, True),  # URL
+        'name': (basestring, True, ResourceValidators.name),
+        'namedPorts': ([InstanceGroupNamedPort], False),
+        'targetPools': ([TargetPool], False),
+        'targetSize': (int, True),
+        'zone': (basestring, False, ResourceValidators.zone)
+    }
+
+
+
+class Route(GCPResource):
+    resource_type = 'compute.v1.route'
+    props = {
+        'description': (basestring, False),
+        'destRange': (basestring, True, ResourceValidators.ipAddress),
+        'name': (basestring, True, ResourceValidators.name),
+        'network': (basestring, True),  # URL
+        'nextHopGateway': (basestring, False),  # URL
+        'nextHopInstance': (basestring, False),  # URL
+        'nextHopIp': (basestring, False, ResourceValidators.ipAddress),
+        'nextHopVpnTunnel': (basestring, False),  # URL
+        'priority': (int, False, range(0, 65536)),
+        'tags': ([basestring], True),
+    }
+
+    def validator(self):
+        # Must have one and only one of nextHopGateway, nextHopInstance, nextHopIp, nextHopVpnTunnel
+        if len(filter(lambda x: self.properties.get(x, False),
+                      ['nextHopGateway', 'nextHopInstance', 'nextHopIp', 'nextHopVpnTunnel'])) != 1:
+            raise ValueError('Must define one and only one of nextHopGateway, nextHopInstance, nextHopIp, nextHopVpnTunnel.')
+
+
 class Subnetwork(GCPResource):
     resource_type = 'compute.v1.subnetworks'
     props = {
@@ -90,21 +142,6 @@ class Subnetwork(GCPResource):
     }
 
 
-class Firewall(GCPResource):
-    resource_type = 'compute.v1.firewall'
-    props = {
-        'name': (basestring, True),
-        'allowed': ([FirewallAllowedPorts], True),
-        'description': (basestring, False),
-        'network': (basestring, True),
-        'sourceRanges': ([basestring], False, ResourceValidators.ipAddress),
-        'sourceTags': ([basestring], False, ResourceValidators.name),
-        'targetTags': ([basestring], False, ResourceValidators.name)
-    }
-
-    def validator(self):
-        if not self.properties.get('sourceRanges') and not self.properties.get('sourceTags'):
-            raise ValueError('Either sourceRanges or sourceTags must be defined')
 
 
 class VpnTunnel(GCPResource):
