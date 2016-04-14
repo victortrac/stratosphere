@@ -75,10 +75,6 @@ class InstanceTemplateDisksProperty(GCPProperty):
             # Boot disks require an initializeParams property
             if not isinstance(self.properties['initializeParams'], InstanceTemplateDiskInitializeParamsProperty):
                 raise ValueError('Boot disks require a initializeParams property')
-        else:
-            # non-boot disks can't have an initializeParams property
-            if self.properties.get('initializeParams'):
-                raise ValueError('Non-boot disks should not have an initializeParams property')
 
 
 class InstanceTemplateMetadataProperty(GCPProperty):
@@ -109,6 +105,7 @@ class InstanceTemplateNetworkInterfaceProperty(GCPProperty):
     def validator(self):
         if self.properties.get('network') and not self.properties.get('subnetwork'):
             raise ValueError('A custom network requires a subnetwork')
+
 
 class InstanceTemplateSchedulingProperty(GCPProperty):
     MIGRATE = 'MIGRATE'

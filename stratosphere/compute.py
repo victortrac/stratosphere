@@ -97,9 +97,9 @@ class Firewall(GCPResource):
         'allowed': ([FirewallAllowedPorts], True),
         'description': (basestring, False),
         'network': (basestring, True),
-        'sourceRanges': ([basestring], False),
-        'sourceTags': ([basestring], False),
-        'targetTags': ([basestring], False)
+        'sourceRanges': ([basestring], False, ResourceValidators.ipAddress),
+        'sourceTags': ([basestring], False, ResourceValidators.name),
+        'targetTags': ([basestring], False, ResourceValidators.name)
     }
 
     def validator(self):

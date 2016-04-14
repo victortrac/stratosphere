@@ -1,6 +1,9 @@
 import hashlib
 import inspect
+import logging
 import yaml
+
+logger = logging.getLogger(__name__)
 
 class Template(object):
     TEMPLATE_TYPE = 'UNDEFINED'  # Need to override this in subclasses
@@ -36,6 +39,8 @@ class BaseGCPResource(object):
     def __init__(self, **kwargs):
         self.properties = {}
         for k, v in kwargs.items():
+            logger.debug("Setting property {}".format(k))
+            logger.log(5, "Property value: {}".format(v))
             self._set_property(k, v)
 
     @property
@@ -60,8 +65,21 @@ class BaseGCPResource(object):
             allowed_values = self.props[key][2]
             if hasattr(allowed_values, '__call__'):
                 # allowed_values is a validator function
-                if not allowed_values(value):
-                    self._raise_value(key, value, allowed_values)
+                if isinstance(value, list):
+                    # validate a list of items (if item is a list)
+                    logger.debug("Validating list of items for key={}".format(key))
+                    for v in value:
+                        logger.log(5, "Validating key='{}', value='{}' against validator function:\n{}"\
+                            .format(key, v, inspect.getsource(allowed_values)))
+                        if not allowed_values(v):
+                            self._raise_value(key, v, allowed_values)
+                else:
+                    # validate single item
+                    logger.debug("Validating item for key={}".format(key))
+                    logger.log(5, "Validating key='{}', value='{}' against validator function:\n{}" \
+                        .format(key, value,inspect.getsource(allowed_values)))
+                    if not allowed_values(value):
+                        self._raise_value(key, value, allowed_values)
             elif value not in allowed_values:
                 self._raise_value(key, value, allowed_values)
         if isinstance(expected_type, list):

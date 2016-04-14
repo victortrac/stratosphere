@@ -1,6 +1,7 @@
 import datetime
 import importlib
 import inspect
+import logging
 import os
 import pprint
 import sys
@@ -11,6 +12,9 @@ from googleapiclient import errors
 
 from resources import Template
 from utils import get_google_auth
+
+
+logger = logging.getLogger(__name__)
 
 dm = get_google_auth('deploymentmanager', 'v2')
 
@@ -30,11 +34,11 @@ def wait_for_completion(project, result):
     while not last_event['status'] in ['DONE', ]:
         time.sleep(1)
         last_event = dm.operations().get(project=project, operation=last_event['name']).execute()
-        print('{} Operation: {name}, TargetLink: {targetLink}, Progress: {progress}, Status: {status}'.
-              format(datetime.datetime.now().isoformat(), **last_event))
+        logger.info('Operation: {name}, TargetLink: {targetLink}, Progress: {progress}, Status: {status}'
+                    .format(**last_event))
     if len(last_event.get('error', [])):
-        print('*** Stack apply failed! ***')
-        pprint.pprint(last_event)
+        logging.error('*** Stack apply failed! ***')
+        logging.fatal(pprint.pprint(last_event))
         sys.exit(1)
     else:
         print('Stack action complete.')
@@ -53,11 +57,11 @@ def apply_deployment(project, template):
     try:
         deployment = get_deployment(project, template.name)
         if deployment:
-            print('Deployment already exists. Updating {}...'.format(template.name))
+            logging.info('Deployment already exists. Updating {}...'.format(template.name))
             body['fingerprint'] = deployment.get('fingerprint')
             result = dm.deployments().update(project=project, deployment=template.name, body=body).execute()
         else:
-            print('Launching a new deployment: {}...'.format(template.name))
+            logging.info('Launching a new deployment: {}...'.format(template.name))
             result = dm.deployments().insert(project=project, body=body).execute()
     except errors.HttpError as e:
         raise e
@@ -84,11 +88,29 @@ def load_template_module(module_path):
 
 @click.command()
 @click.option('--project', prompt='Your GCP Project', help='GCP project where to put resources.')
-@click.option('--env', prompt='Deployment env', help='Env of deployment. Used for generating the deployment name: [env]-[template]')
+@click.option('--env', prompt='Deployment env',
+              help='Env of deployment. Used for generating the deployment name: [env]-[template]')
 @click.option('--action', prompt="Deployment action", default='template',
-                type=click.Choice(['apply', 'template', 'delete']), help="What you want to do with this template")
+              type=click.Choice(['apply', 'template', 'delete']), help="What you want to do with this template")
+@click.option('-v', '--verbose', prompt="Verbosity", help="Enable verbose logging, supply multiple for more logging", count=True)
 @click.argument('template_path', type=click.Path(exists=True), required=False)
-def main(project, env, action, template_path):
+def main(project, env, action, verbose, template_path):
+
+    if verbose >= 2:
+        level = 5
+    elif verbose == 1:
+        level = logging.DEBUG
+    else:
+        level = logging.INFO
+
+    logging.addLevelName(5, "TRACE")
+
+    logging.basicConfig(format='%(asctime)s %(levelname)s:%(name)s:%(message)s',
+                        datefmt='%Y-%m-%d %H:%M:%S', level=level)
+
+    logger.debug('Debug log enabled')
+    logger.info("Log level: {}".format(level))
+
     if action in ['apply', 'template']:
         template_class = load_template_module(template_path)
         template = template_class(project, env)
@@ -96,7 +118,9 @@ def main(project, env, action, template_path):
             template.__repr__()
             apply_deployment(project, template)
         elif action == 'template':
-            print(template)
+            t = template.__repr__()
+            logger.info('Template successfully rendered, printing to stdout...')
+            print(t)
             sys.exit(0)
 
 
