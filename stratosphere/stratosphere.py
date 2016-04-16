@@ -92,7 +92,8 @@ def load_template_module(module_path):
               help='Env of deployment. Used for generating the deployment name: [env]-[template]')
 @click.option('--action', prompt="Deployment action", default='template',
               type=click.Choice(['apply', 'template', 'delete']), help="What you want to do with this template")
-@click.option('-v', '--verbose', prompt="Verbosity", help="Enable verbose logging, supply multiple for more logging", count=True)
+@click.option('-v', '--verbose', required=False, default=0, count=True,
+              help="Enable verbose logging, supply multiple for more logging")
 @click.argument('template_path', type=click.Path(exists=True), required=False)
 def main(project, env, action, verbose, template_path):
 
