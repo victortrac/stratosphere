@@ -38,7 +38,6 @@ class Template(object):
             self.configure()
             self.configured = True
         return unicode(self.formatter())
-        #return unicode(self.asJSON())
 
 
 class BaseGCPResource(object):

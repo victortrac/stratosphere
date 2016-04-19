@@ -50,21 +50,6 @@ class Disk(GCPResource):
             raise ValueError('{} unable to specify both sourceImage and sourceSnapshot.'.format(self.__class__))
 
 
-class HttpHealthCheck(GCPResource):
-    resource_type = 'compute.v1.httpHealthCheck'
-    props = {
-        'checkIntervalSec': (int, False),
-        'description': (basestring, False),
-        'healthyThreshold': (int, False),
-        'host': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
-        'port': (int, False),
-        'requestPath': (basestring, False),
-        'timeoutSec': (int, False),
-        'unhealthyThreshold': (int, False)
-    }
-
-
 class BackendService(GCPResource):
     HTTP = "HTTP"
     HTTPS = "HTTPS"
@@ -162,12 +147,19 @@ class GlobalForwardingRule(GCPResource):
                 raise ValueError('PortRange must be set if protocol is: {}'.format(",".join(protos)))
 
 
-## For later...
-# class GlobalForwardingRule(ForwardingRule):
-#     def __init__(self):
-#         super(GlobalForwardingRule, self).__init__(self)
-#         self.props['region'] = ()
-
+class HttpHealthCheck(GCPResource):
+    resource_type = 'compute.v1.httpHealthCheck'
+    props = {
+        'checkIntervalSec': (int, False),
+        'description': (basestring, False),
+        'healthyThreshold': (int, False),
+        'host': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
+        'port': (int, False),
+        'requestPath': (basestring, False),
+        'timeoutSec': (int, False),
+        'unhealthyThreshold': (int, False)
+    }
 
 
 class InstanceGroup(GCPResource):
@@ -231,7 +223,6 @@ class RegionInstanceGroupManager(GCPResource):
         'targetSize': (int, True),
         'zone': (basestring, False, ResourceValidators.zone)
     }
-
 
 
 class Route(GCPResource):

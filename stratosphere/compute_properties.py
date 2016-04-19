@@ -2,28 +2,6 @@ from common import ResourceValidators
 from resources import GCPProperty
 
 
-class BackendServiceBackend(GCPProperty):
-    UTILIZATION = "UTILIZATION"
-    RATE = "RATE"
-    BALANCING_MODES = [UTILIZATION, RATE]
-
-    props = {
-        'balancingMode': (basestring, True, BALANCING_MODES),
-        'capacityScaler': (float, False),
-        'description': (basestring, False),
-        'group': (basestring, True),
-        'maxRate': (int, False),
-        'maxRatePerInstance': (float, False),
-        'maxUtilization': (float, False)
-    }
-
-    def validator(self):
-        if self.properties.get('balancingMode') == self.RATE:
-            if not self.properties.get('maxRate') or not self.properties.get('maxRatePerInstance'):
-                raise ValueError('{} maxRate or maxRatePerInstance must be set if using RATE mode'
-                                 .format(self.__class__))
-
-
 class AutoscalingPolicyCpuUtilization(GCPProperty):
     props = {
         'utilizationTarget': (float, False)
@@ -58,6 +36,28 @@ class AutoscalingPolicy(GCPProperty):
         'name': (basestring, True, ResourceValidators.name),
         'target': (basestring, True)  # URL
     }
+
+
+class BackendServiceBackend(GCPProperty):
+    UTILIZATION = "UTILIZATION"
+    RATE = "RATE"
+    BALANCING_MODES = [UTILIZATION, RATE]
+
+    props = {
+        'balancingMode': (basestring, True, BALANCING_MODES),
+        'capacityScaler': (float, False),
+        'description': (basestring, False),
+        'group': (basestring, True),
+        'maxRate': (int, False),
+        'maxRatePerInstance': (float, False),
+        'maxUtilization': (float, False)
+    }
+
+    def validator(self):
+        if self.properties.get('balancingMode') == self.RATE:
+            if not self.properties.get('maxRate') or not self.properties.get('maxRatePerInstance'):
+                raise ValueError('{} maxRate or maxRatePerInstance must be set if using RATE mode'
+                                 .format(self.__class__))
 
 
 class FirewallAllowedPorts(GCPProperty):
