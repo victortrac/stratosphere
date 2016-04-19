@@ -94,8 +94,10 @@ def load_template_module(module_path):
               type=click.Choice(['apply', 'template', 'delete']), help="What you want to do with this template")
 @click.option('-v', '--verbose', required=False, default=0, count=True,
               help="Enable verbose logging, supply multiple for more logging")
+@click.option('--format', prompt="Output format", help="Set output format of template",
+              type=click.Choice(['yaml', 'json']), default="yaml", required=False)
 @click.argument('template_path', type=click.Path(exists=True), required=False)
-def main(project, env, action, verbose, template_path):
+def main(project, env, action, verbose, format, template_path):
 
     if verbose >= 2:
         level = 5
@@ -115,6 +117,10 @@ def main(project, env, action, verbose, template_path):
     if action in ['apply', 'template']:
         template_class = load_template_module(template_path)
         template = template_class(project, env)
+
+        if format == "json":
+            template.formatter = template.asJSON
+
         if action == 'apply':
             template.__repr__()
             apply_deployment(project, template)

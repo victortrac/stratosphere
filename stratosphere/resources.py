@@ -15,6 +15,7 @@ class Template(object):
         self._name = "{}-{}".format(env, self.TEMPLATE_TYPE)
         self.resources = []
         self.configured = False
+        self.formatter = self.asYAML
 
     @property
     def name(self):
@@ -36,7 +37,7 @@ class Template(object):
         if not self.configured:
             self.configure()
             self.configured = True
-        return unicode(self.asYAML())
+        return unicode(self.formatter())
         #return unicode(self.asJSON())
 
 
