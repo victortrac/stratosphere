@@ -2,6 +2,7 @@ import hashlib
 import inspect
 import logging
 import yaml
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -28,11 +29,15 @@ class Template(object):
     def asYAML(self):
         return yaml.safe_dump({'resources': [r.asObject() for r in self.resources]})
 
+    def asJSON(self):
+        return json.dumps({'resources': [r.asObject() for r in self.resources]})
+
     def __repr__(self):
         if not self.configured:
             self.configure()
             self.configured = True
         return unicode(self.asYAML())
+        #return unicode(self.asJSON())
 
 
 class BaseGCPResource(object):

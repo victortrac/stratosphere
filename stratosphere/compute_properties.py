@@ -2,6 +2,28 @@ from common import ResourceValidators
 from resources import GCPProperty
 
 
+class BackendServiceBackend(GCPProperty):
+    UTILIZATION = "UTILIZATION"
+    RATE = "RATE"
+    BALANCING_MODES = [UTILIZATION, RATE]
+
+    props = {
+        'balancingMode': (basestring, True, BALANCING_MODES),
+        'capacityScaler': (float, False),
+        'description': (basestring, False),
+        'group': (basestring, True),
+        'maxRate': (int, False),
+        'maxRatePerInstance': (float, False),
+        'maxUtilization': (float, False)
+    }
+
+    def validator(self):
+        if self.properties.get('balancingMode') == self.RATE:
+            if not self.properties.get('maxRate') or not self.properties.get('maxRatePerInstance'):
+                raise ValueError('{} maxRate or maxRatePerInstance must be set if using RATE mode'
+                                 .format(self.__class__))
+
+
 class AutoscalingPolicyCpuUtilization(GCPProperty):
     props = {
         'utilizationTarget': (float, False)
@@ -92,6 +114,7 @@ class InstanceTemplateDisksProperty(GCPProperty):
         'interface': (basestring, False),
         'mode': (basestring, False),
         'source': (basestring, False),
+        'sizeGb': (int, False),
         'type': (basestring, True, VALID_TYPES)
     }
 
@@ -200,3 +223,34 @@ class InstanceGroupNamedPort(GCPProperty):
     }
 
 
+class UrlMapHostRule(GCPProperty):
+    props = {
+        'description': (basestring, False),
+        'hosts': ([basestring], True),
+        'pathMatcher': (basestring, True)
+    }
+
+
+class UrlMapPathMatcherPathRule(GCPProperty):
+    props = {
+        'paths': ([basestring], True),
+        'service': (basestring, True)
+    }
+
+
+class UrlMapPathMatcher(GCPProperty):
+    props = {
+        'defaultService': (basestring, True),
+        'description': (basestring, False),
+        'name': (basestring, True),
+        'pathRules': ([UrlMapPathMatcherPathRule], False)
+    }
+
+
+class UrlMapTests(GCPProperty):
+    props = {
+        'description': (basestring, False),
+        'host': (basestring, True),
+        'path': (basestring, True),
+        'service': (basestring, True)
+    }

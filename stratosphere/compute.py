@@ -1,18 +1,23 @@
 from common import ResourceValidators
 from resources import GCPResource
-from compute_properties import InstanceTemplateProperty, InstanceGroupNamedPort, AutoscalingPolicy, \
-    FirewallAllowedPorts
+from compute_properties import BackendServiceBackend, InstanceTemplateProperty, InstanceGroupNamedPort, AutoscalingPolicy, \
+    FirewallAllowedPorts, UrlMapHostRule, UrlMapPathMatcher, UrlMapTests
 
 
 class Address(GCPResource):
-    '''
-    A Regional Reserved IP Address
-    '''
     resource_type = 'compute.v1.address'
     props = {
         'description': (basestring, False),
         'name': (basestring, True, ResourceValidators.name),
         'region': (basestring, True)
+    }
+
+
+class GlobalAddress(GCPResource):
+    resource_type = 'compute.v1.globalAddress'
+    props = {
+        'description': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name)
     }
 
 
@@ -28,10 +33,71 @@ class Autoscaler(GCPResource):
     }
 
 
+class Disk(GCPResource):
+    resource_type = 'compute.v1.disk'
+    props = {
+        'description': (basestring, False),
+        'name': (basestring, True),
+        'sizeGb': (long, True),
+        'sourceImage': (basestring, False),
+        'sourceSnapshot': (basestring, False),
+        'type': (basestring, True),
+        'zone': (basestring, True)
+    }
+
+    def validator(self):
+        if self.properties.get('sourceImage') and self.properties.get('sourceSnapshot'):
+            raise ValueError('{} unable to specify both sourceImage and sourceSnapshot.'.format(self.__class__))
+
+
+class HttpHealthCheck(GCPResource):
+    resource_type = 'compute.v1.httpHealthCheck'
+    props = {
+        'checkIntervalSec': (int, False),
+        'description': (basestring, False),
+        'healthyThreshold': (int, False),
+        'host': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
+        'port': (int, False),
+        'requestPath': (basestring, False),
+        'timeoutSec': (int, False),
+        'unhealthyThreshold': (int, False)
+    }
+
+
+class BackendService(GCPResource):
+    HTTP = "HTTP"
+    HTTPS = "HTTPS"
+    HTTP2 = "HTTP2"
+    TCP = "TCP"
+    SSL = "SSL"
+    ALLOWED_PROTOCOLS = [HTTP, HTTPS, HTTP2, TCP, SSL]
+
+    resource_type = 'compute.v1.backendService'
+    props = {
+        'backends': ([BackendServiceBackend], True),
+        'description': (basestring, False),
+        'healthChecks': ([basestring], True),
+        'name': (basestring, True, ResourceValidators.name),
+        'port': (int, True),
+        'portName': (basestring, True),
+        'protocol': (basestring, True, ALLOWED_PROTOCOLS)
+    }
+
+
+class TargetHttpProxy(GCPResource):
+    resource_type = 'compute.v1.targetHttpProxy'
+    props = {
+        'description': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
+        'urlMap': (basestring, True)
+    }
+
+
 class Firewall(GCPResource):
     resource_type = 'compute.v1.firewall'
     props = {
-        'name': (basestring, True),
+        'name': (basestring, True, ResourceValidators.name),
         'allowed': ([FirewallAllowedPorts], True),
         'description': (basestring, False),
         'network': (basestring, True),
@@ -43,6 +109,65 @@ class Firewall(GCPResource):
     def validator(self):
         if not (bool(self.properties.get('sourceRanges')) != bool(self.properties.get('sourceTags'))):
             raise ValueError('Either sourceRanges or sourceTags must be defined')
+
+
+class ForwardingRule(GCPResource):
+    TCP = 'TCP'
+    UDP = 'UDP'
+    ESP = 'ESP'
+    AH = 'AH'
+    SCTP = 'SCTP'
+    ALLOWED_PROTOCOLS = [TCP, UDP, ESP, AH, SCTP]
+
+    resource_type = 'compute.v1.forwardingRule'
+    props = {
+        'name': (basestring, True, ResourceValidators.name),
+        'description': (basestring, False),
+        'IPAddress': (basestring, False),
+        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
+        'portRange': (basestring, False),
+        'target': (basestring, True),
+        'region': (basestring, True)
+    }
+
+    def validator(self):
+        protos = (self.TCP, self.UDP, self.SCTP)
+        if self.properties.get('IPProtocol') in protos:
+            if not self.properties.get('portRange'):
+                raise ValueError('PortRange must be set if protocol is: {}'.format(",".join(protos)))
+
+
+class GlobalForwardingRule(GCPResource):
+    TCP = 'TCP'
+    UDP = 'UDP'
+    ESP = 'ESP'
+    AH = 'AH'
+    SCTP = 'SCTP'
+    ALLOWED_PROTOCOLS = [TCP, UDP, ESP, AH, SCTP]
+
+    resource_type = 'compute.v1.globalForwardingRule'
+    props = {
+        'name': (basestring, True, ResourceValidators.name),
+        'description': (basestring, False),
+        'IPAddress': (basestring, False),
+        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
+        'portRange': (basestring, False),
+        'target': (basestring, True)
+    }
+
+    def validator(self):
+        protos = (self.TCP, self.UDP, self.SCTP)
+        if self.properties.get('IPProtocol') in protos:
+            if not self.properties.get('portRange'):
+                raise ValueError('PortRange must be set if protocol is: {}'.format(",".join(protos)))
+
+
+## For later...
+# class GlobalForwardingRule(ForwardingRule):
+#     def __init__(self):
+#         super(GlobalForwardingRule, self).__init__(self)
+#         self.props['region'] = ()
+
 
 
 class InstanceGroup(GCPResource):
@@ -142,6 +267,16 @@ class Subnetwork(GCPResource):
     }
 
 
+class UrlMap(GCPResource):
+    resource_type = 'compute.v1.urlMap'
+    props = {
+        'name': (basestring, True, ResourceValidators.name),
+        'defaultService': (basestring, True),
+        'description': (basestring, False),
+        'hostRules': ([UrlMapHostRule], True),
+        'pathMatchers': ([UrlMapPathMatcher], True),
+        'tests': ([UrlMapTests], False)
+    }
 
 
 class VpnTunnel(GCPResource):
