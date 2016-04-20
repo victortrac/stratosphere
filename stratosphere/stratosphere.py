@@ -73,10 +73,10 @@ def wait_for_completion(project, result):
 
 def confirm_action():
     # raw_input returns the empty string for "enter"
-    yes = set(['yes','y', 'ye', ''])
-    no = set(['no','n'])
+    yes = ('yes', 'y', 'ye', '')
+    no = ('no', 'n')
 
-    sys.stdout.write("\n\nContinue? (yes/no) ")
+    sys.stdout.write("\nContinue? (yes/no) ")
     choice = raw_input().lower().strip()
     if choice in yes:
         sys.stdout.write('Running in ')
@@ -106,7 +106,7 @@ def apply_deployment(project, template):
     try:
         deployment = get_deployment(project, template.name)
         if deployment:
-            logging.info('Deployment already exists. Updating {}...'.format(template.name))
+            logging.info('Deployment already exists. Getting changes for {}...'.format(template.name))
             body['fingerprint'] = deployment.get('fingerprint')
             changed = False
             for diff in color_diff(difflib.unified_diff(get_manifest(project, deployment)['config']['content'].splitlines(),
@@ -120,13 +120,12 @@ def apply_deployment(project, template):
                 logging.info('No changes in the template.')
                 sys.exit(0)
         else:
-            logging.info('Launching a new deployment: {}...'.format(template.name))
             logging.info('Generated template:\n{}\n'.format(template))
+            logging.info('Launching a new deployment: {}...'.format(template.name))
             if confirm_action():
                 result = dm.deployments().insert(project=project, body=body).execute()
     except errors.HttpError as e:
         raise e
-
     if result:
         return wait_for_completion(project, result)
 
@@ -159,7 +158,6 @@ def load_template_module(module_path):
               type=click.Choice(['yaml', 'json']), default="yaml", required=False)
 @click.argument('template_path', type=click.Path(exists=True), required=False)
 def main(project, env, action, verbose, format, template_path):
-
     if verbose >= 2:
         level = 5
     elif verbose == 1:

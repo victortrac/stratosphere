@@ -302,6 +302,15 @@ class Subnetwork(GCPResource):
     }
 
 
+class TargetVpnGateway(GCPResource):
+    resource_type = 'compute.v1.targetVpnGateway'
+    props = {
+        'description': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
+        'network': (basestring, True)
+    }
+
+
 class UrlMap(GCPResource):
     resource_type = 'compute.v1.urlMap'
     props = {
@@ -322,7 +331,8 @@ class VpnTunnel(GCPResource):
         'localTrafficSelector': ([basestring], True, ResourceValidators.ipAddress),
         'name': (basestring, True, ResourceValidators.name),
         'peerIp': (basestring, True, ResourceValidators.ipAddress),
+        'region': (basestring, True),
         'sharedSecret': (basestring, True),
         'sharedSecretHash': (basestring, False),
-        'targetVpnGateway': (basestring, False)  # URL
+        'targetVpnGateway': (basestring, True)  # URL
     }
