@@ -1,4 +1,5 @@
-import datetime
+import colorama
+import difflib
 import importlib
 import inspect
 import logging
@@ -8,6 +9,7 @@ import sys
 import time
 
 import click
+import colorama
 from googleapiclient import errors
 
 from resources import Template
@@ -15,8 +17,20 @@ from utils import get_google_auth
 
 
 logger = logging.getLogger(__name__)
-
 dm = get_google_auth('deploymentmanager', 'v2')
+colorama.init()
+
+
+def color_diff(diff):
+    for line in diff:
+        if line.startswith('+'):
+            yield colorama.Fore.GREEN + line + colorama.Fore.RESET
+        elif line.startswith('-'):
+            yield colorama.Fore.RED + line + colorama.Fore.RESET
+        elif line.startswith('^'):
+            yield colorama.Fore.BLUE + line + colorama.Fore.RESET
+        else:
+            yield line
 
 def get_deployment(project, deployment):
     try:
@@ -27,6 +41,17 @@ def get_deployment(project, deployment):
             return None
         else:
             raise e
+
+def get_manifest(project, deployment):
+    """
+    From a project name and a DM.deployments().get() result, extract the actual manifest
+    """
+    manifest = deployment['manifest'].split('/')[-1]
+    try:
+        result = dm.manifests().get(project=project, deployment=deployment['name'], manifest=manifest).execute()
+        return result
+    except errors.HttpError as e:
+        raise e
 
 def wait_for_completion(project, result):
     print('Waiting for deployment {}...'.format(result['name']))
@@ -80,9 +105,17 @@ def apply_deployment(project, template):
         if deployment:
             logging.info('Deployment already exists. Updating {}...'.format(template.name))
             body['fingerprint'] = deployment.get('fingerprint')
-            logging.info('Generated template:\n{}\n'.format(template))
-            if confirm_action():
+            changed = False
+            for diff in color_diff(difflib.unified_diff(get_manifest(project, deployment)['config']['content'].splitlines(),
+                                                        unicode(template).splitlines(),
+                                                        fromfile='Existing template', tofile='Proposed template')):
+                changed = True
+                print(diff)
+            if changed and confirm_action():
                 result = dm.deployments().update(project=project, deployment=template.name, body=body).execute()
+            else:
+                logging.info('No changes in the template.')
+                sys.exit(0)
         else:
             logging.info('Launching a new deployment: {}...'.format(template.name))
             logging.info('Generated template:\n{}\n'.format(template))
