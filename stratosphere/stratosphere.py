@@ -43,6 +43,27 @@ def wait_for_completion(project, result):
     else:
         print('Stack action complete.')
 
+def confirm_action():
+    # raw_input returns the empty string for "enter"
+    yes = set(['yes','y', 'ye', ''])
+    no = set(['no','n'])
+
+    sys.stdout.write("\n\nContinue? (yes/no) ")
+    choice = raw_input().lower().strip()
+    if choice in yes:
+        sys.stdout.write('Running in ')
+        sys.stdout.flush()
+        for i in range(5, 0, -1):
+            sys.stdout.write('{}...'.format(i))
+            sys.stdout.flush()
+            time.sleep(1)
+        sys.stdout.write("\n")
+        return True
+    elif choice in no:
+        sys.stdout.write("Cancelled.\n")
+    else:
+        sys.stdout.write("Please respond with 'yes' or 'no'")
+    return False
 
 def apply_deployment(project, template):
     body = {
@@ -59,10 +80,14 @@ def apply_deployment(project, template):
         if deployment:
             logging.info('Deployment already exists. Updating {}...'.format(template.name))
             body['fingerprint'] = deployment.get('fingerprint')
-            result = dm.deployments().update(project=project, deployment=template.name, body=body).execute()
+            logging.info('Generated template:\n{}\n'.format(template))
+            if confirm_action():
+                result = dm.deployments().update(project=project, deployment=template.name, body=body).execute()
         else:
             logging.info('Launching a new deployment: {}...'.format(template.name))
-            result = dm.deployments().insert(project=project, body=body).execute()
+            logging.info('Generated template:\n{}\n'.format(template))
+            if confirm_action():
+                result = dm.deployments().insert(project=project, body=body).execute()
     except errors.HttpError as e:
         raise e
 
@@ -94,7 +119,7 @@ def load_template_module(module_path):
               type=click.Choice(['apply', 'template', 'delete']), help="What you want to do with this template")
 @click.option('-v', '--verbose', required=False, default=0, count=True,
               help="Enable verbose logging, supply multiple for more logging")
-@click.option('--format', prompt="Output format", help="Set output format of template",
+@click.option('--format', help="Set output format of template",
               type=click.Choice(['yaml', 'json']), default="yaml", required=False)
 @click.argument('template_path', type=click.Path(exists=True), required=False)
 def main(project, env, action, verbose, format, template_path):
@@ -104,10 +129,11 @@ def main(project, env, action, verbose, format, template_path):
     elif verbose == 1:
         level = logging.DEBUG
     else:
+        logging.getLogger('googleapiclient').setLevel(logging.ERROR)
+        logging.getLogger('oauth2client').setLevel(logging.ERROR)
         level = logging.INFO
 
     logging.addLevelName(5, "TRACE")
-
     logging.basicConfig(format='%(asctime)s %(levelname)s:%(name)s:%(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S', level=level)
 
