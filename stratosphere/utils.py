@@ -28,18 +28,18 @@ def get_latest_image(project, name):
     if not newest_image:
         raise KeyError("No images found for {}/{}".format(project, name))
 
-    return newest_image
+    return 'projects/{}/global/images/{}'.format(project, newest_image['name'])
 
 
 def load_startup_script(path, replacements=None):
-    '''
+    """
     Loads a startup-script from disk
 
     path (str): A path to the script file
     replacements (tuple): A tuple of string replacements to run on the file, if supplied.
                           Formatted like: ((string1, string2, count), (string3, string4, count) where
                           count is the number of replacements to make for that pattern
-    '''
+    """
     path = os.path.abspath(path)
     if os.path.isfile(path):
         with open(path) as f:

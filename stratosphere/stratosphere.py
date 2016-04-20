@@ -1,4 +1,5 @@
-import datetime
+import colorama
+import difflib
 import importlib
 import inspect
 import logging
@@ -8,6 +9,7 @@ import sys
 import time
 
 import click
+import colorama
 from googleapiclient import errors
 
 from resources import Template
@@ -15,8 +17,20 @@ from utils import get_google_auth
 
 
 logger = logging.getLogger(__name__)
-
 dm = get_google_auth('deploymentmanager', 'v2')
+colorama.init()
+
+
+def color_diff(diff):
+    for line in diff:
+        if line.startswith('+'):
+            yield colorama.Fore.GREEN + line + colorama.Fore.RESET
+        elif line.startswith('-'):
+            yield colorama.Fore.RED + line + colorama.Fore.RESET
+        elif line.startswith('^'):
+            yield colorama.Fore.BLUE + line + colorama.Fore.RESET
+        else:
+            yield line
 
 def get_deployment(project, deployment):
     try:
@@ -27,6 +41,17 @@ def get_deployment(project, deployment):
             return None
         else:
             raise e
+
+def get_manifest(project, deployment):
+    """
+    From a project name and a DM.deployments().get() result, extract the actual manifest
+    """
+    manifest = deployment['manifest'].split('/')[-1]
+    try:
+        result = dm.manifests().get(project=project, deployment=deployment['name'], manifest=manifest).execute()
+        return result
+    except errors.HttpError as e:
+        raise e
 
 def wait_for_completion(project, result):
     print('Waiting for deployment {}...'.format(result['name']))
@@ -43,6 +68,27 @@ def wait_for_completion(project, result):
     else:
         print('Stack action complete.')
 
+def confirm_action():
+    # raw_input returns the empty string for "enter"
+    yes = set(['yes','y', 'ye', ''])
+    no = set(['no','n'])
+
+    sys.stdout.write("\n\nContinue? (yes/no) ")
+    choice = raw_input().lower().strip()
+    if choice in yes:
+        sys.stdout.write('Running in ')
+        sys.stdout.flush()
+        for i in range(5, 0, -1):
+            sys.stdout.write('{}...'.format(i))
+            sys.stdout.flush()
+            time.sleep(1)
+        sys.stdout.write("\n")
+        return True
+    elif choice in no:
+        sys.stdout.write("Cancelled.\n")
+    else:
+        sys.stdout.write("Please respond with 'yes' or 'no'")
+    return False
 
 def apply_deployment(project, template):
     body = {
@@ -59,10 +105,22 @@ def apply_deployment(project, template):
         if deployment:
             logging.info('Deployment already exists. Updating {}...'.format(template.name))
             body['fingerprint'] = deployment.get('fingerprint')
-            result = dm.deployments().update(project=project, deployment=template.name, body=body).execute()
+            changed = False
+            for diff in color_diff(difflib.unified_diff(get_manifest(project, deployment)['config']['content'].splitlines(),
+                                                        unicode(template).splitlines(),
+                                                        fromfile='Existing template', tofile='Proposed template')):
+                changed = True
+                print(diff)
+            if changed and confirm_action():
+                result = dm.deployments().update(project=project, deployment=template.name, body=body).execute()
+            else:
+                logging.info('No changes in the template.')
+                sys.exit(0)
         else:
             logging.info('Launching a new deployment: {}...'.format(template.name))
-            result = dm.deployments().insert(project=project, body=body).execute()
+            logging.info('Generated template:\n{}\n'.format(template))
+            if confirm_action():
+                result = dm.deployments().insert(project=project, body=body).execute()
     except errors.HttpError as e:
         raise e
 
@@ -104,10 +162,11 @@ def main(project, env, action, verbose, format, template_path):
     elif verbose == 1:
         level = logging.DEBUG
     else:
+        logging.getLogger('googleapiclient').setLevel(logging.ERROR)
+        logging.getLogger('oauth2client').setLevel(logging.ERROR)
         level = logging.INFO
 
     logging.addLevelName(5, "TRACE")
-
     logging.basicConfig(format='%(asctime)s %(levelname)s:%(name)s:%(message)s',
                         datefmt='%Y-%m-%d %H:%M:%S', level=level)
 

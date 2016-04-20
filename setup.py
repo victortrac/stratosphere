@@ -18,7 +18,7 @@ setup(
     ],
     keywords='google cloud development automation',
     packages=['stratosphere', ],
-    install_requires=['click', 'google-api-python-client', 'netaddr', 'PyYAML'],
+    install_requires=['click', 'colorama', 'google-api-python-client', 'netaddr', 'PyYAML'],
     entry_points={
         'console_scripts': [
             'stratosphere = stratosphere.stratosphere:main'
