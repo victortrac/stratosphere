@@ -46,7 +46,10 @@ def get_manifest(project, deployment):
     """
     From a project name and a DM.deployments().get() result, extract the actual manifest
     """
-    manifest = deployment['manifest'].split('/')[-1]
+    try:
+        manifest = deployment['manifest'].split('/')[-1]
+    except KeyError as e:
+        manifest = deployment['update']['manifest'].split('/')[-1]
     try:
         result = dm.manifests().get(project=project, deployment=deployment['name'], manifest=manifest).execute()
         return result
@@ -152,7 +155,7 @@ def load_template_module(module_path):
               type=click.Choice(['apply', 'template', 'delete']), help="What you want to do with this template")
 @click.option('-v', '--verbose', required=False, default=0, count=True,
               help="Enable verbose logging, supply multiple for more logging")
-@click.option('--format', prompt="Output format", help="Set output format of template",
+@click.option('--format', help="Set output format of template",
               type=click.Choice(['yaml', 'json']), default="yaml", required=False)
 @click.argument('template_path', type=click.Path(exists=True), required=False)
 def main(project, env, action, verbose, format, template_path):

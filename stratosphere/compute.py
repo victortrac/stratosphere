@@ -1,7 +1,9 @@
 from common import ResourceValidators
 from resources import GCPResource
 from compute_properties import BackendServiceBackend, InstanceTemplateProperty, InstanceGroupNamedPort, AutoscalingPolicy, \
-    FirewallAllowedPorts, UrlMapHostRule, UrlMapPathMatcher, UrlMapTests
+    FirewallAllowedPorts, UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
+    InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, InstanceTemplateSchedulingProperty, \
+    InstanceTemplateServiceAccountsProperty, InstanceTemplateTagsProperty
 
 
 class Address(GCPResource):
@@ -173,6 +175,38 @@ class InstanceGroup(GCPResource):
     }
 
 
+class Instance(GCPResource):
+    resource_type = 'compute.v1.instance'
+    props = {
+        'name': (basestring, True, ResourceValidators.name),
+        'description': (basestring, False),
+        'canIpForward': (bool, False),
+        'disks': ([InstanceTemplateDisksProperty], True),
+        'machineType': (basestring, True),
+        'metadata': (InstanceTemplateMetadataProperty, False),
+        'networkInterfaces': ([InstanceTemplateNetworkInterfaceProperty], True),
+        'scheduling': (InstanceTemplateSchedulingProperty, False),
+        'serviceAccounts': ([InstanceTemplateServiceAccountsProperty], False),
+        'tags': (InstanceTemplateTagsProperty, False),
+        'zone': (basestring, True)
+    }
+
+    def validator(self):
+        # at least one disk must be marked as boot
+        boot_count = 0
+        for disk in self.properties.get('disks'):
+            if disk.properties['boot'] == True:
+                boot_count += 1
+                # Boot disks must be persistent
+                if not disk.properties['type'] == InstanceTemplateDisksProperty.PERSISTENT:
+                    raise ValueError('{} - Boot disks must be persistent!'.format(disk))
+                # Boot disks must have a source
+                if not disk.properties.get('initializeParams'):
+                    raise ValueError('{} - Boot disks must have initializeParams!'.format(disk))
+        if not boot_count == 1:
+            raise ValueError('{} - One disk must be marked as bootable!'.format(self.__class__))
+
+
 class TargetPool(GCPResource):
     pass
 
@@ -236,7 +270,7 @@ class Route(GCPResource):
         'nextHopInstance': (basestring, False),  # URL
         'nextHopIp': (basestring, False, ResourceValidators.ipAddress),
         'nextHopVpnTunnel': (basestring, False),  # URL
-        'priority': (int, False, range(0, 65536)),
+        'priority': (int, False, range(1, 65536)),
         'tags': ([basestring], True),
     }
 
