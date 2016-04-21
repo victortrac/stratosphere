@@ -281,7 +281,7 @@ class Route(GCPResource):
         'nextHopIp': (basestring, False, ResourceValidators.ipAddress),
         'nextHopVpnTunnel': (basestring, False),  # URL
         'priority': (int, False, range(1, 65536)),
-        'tags': ([basestring], True),
+        'tags': ([basestring], True),  # Bug in GCP: requires at least an empty list
     }
 
     def validator(self):
@@ -307,7 +307,8 @@ class TargetVpnGateway(GCPResource):
     props = {
         'description': (basestring, False),
         'name': (basestring, True, ResourceValidators.name),
-        'network': (basestring, True)
+        'network': (basestring, True),
+        'region': (basestring, True),
     }
 
 

@@ -48,6 +48,10 @@ class ResourceNames(object):
     def networkName(self):
         return '{}-network'.format(self.env)
 
+    @property
+    def networkUrl(self):
+        return "projects/{}/global/networks/{}".format(self.project, self.networkName)
+
     def subnetworkName(self, zone):
         return '{}-{}-subnetwork'.format(self.env, zone)
 

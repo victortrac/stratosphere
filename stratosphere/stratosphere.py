@@ -121,7 +121,7 @@ def apply_deployment(project, template):
                 sys.exit(0)
         else:
             logging.info('Generated template:\n{}\n'.format(template))
-            logging.info('Launching a new deployment: {}...'.format(template.name))
+            logging.info('Launching a new deployment: {}'.format(template.name))
             if confirm_action():
                 result = dm.deployments().insert(project=project, body=body).execute()
     except errors.HttpError as e:

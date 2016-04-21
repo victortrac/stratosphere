@@ -157,6 +157,13 @@ class GCPResource(BaseGCPResource):
             'properties': self._toObject()
         }
 
+    def asUrl(self):
+        """
+        Tries to turn a self.resource_type into a Google Cloud Platform API URL
+        """
+        api, version, resource_type = self.resource_type.split('.')
+        pass
+
 
 class GCPProperty(BaseGCPResource):
     def asObject(self):
