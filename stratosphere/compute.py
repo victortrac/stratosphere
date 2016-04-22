@@ -81,6 +81,16 @@ class TargetHttpProxy(GCPResource):
     }
 
 
+class TargetHttpsProxy(GCPResource):
+    resource_type = 'compute.v1.targetHttpsProxy'
+    props = {
+        'description': (basestring, False),
+        'name': (basestring, True, ResourceValidators.name),
+        'urlMap': (basestring, True),
+        'sslCertificates': ([basestring], True)
+    }
+
+
 class Firewall(GCPResource):
     resource_type = 'compute.v1.firewall'
     props = {

@@ -37,7 +37,7 @@ def load_startup_script(path, replacements=None):
 
     path (str): A path to the script file
     replacements (tuple): A tuple of string replacements to run on the file, if supplied.
-                          Formatted like: ((string1, string2, count), (string3, string4, count) where
+                          Formatted like: ((string1, string2, count), (string3, string4, count)) where
                           count is the number of replacements to make for that pattern
     """
     path = os.path.abspath(path)
@@ -46,9 +46,10 @@ def load_startup_script(path, replacements=None):
             script = f.read()
     else:
         raise ValueError('Startup-script file not found: {}'.format(path))
-
     if replacements is not None:
         for replacement in replacements:
+            if not isinstance(replacement, tuple):
+                raise ValueError('Replacements must be a tuple of tuples to replace')
             from_string = str(replacement[0])
             to_string = str(replacement[1])
             if len(replacement) == 3:
