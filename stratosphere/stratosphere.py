@@ -46,7 +46,10 @@ def get_manifest(project, deployment):
     """
     From a project name and a DM.deployments().get() result, extract the actual manifest
     """
-    manifest = deployment['manifest'].split('/')[-1]
+    try:
+        manifest = deployment['manifest'].split('/')[-1]
+    except KeyError as e:
+        manifest = deployment['update']['manifest'].split('/')[-1]
     try:
         result = dm.manifests().get(project=project, deployment=deployment['name'], manifest=manifest).execute()
         return result
