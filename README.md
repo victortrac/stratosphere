@@ -42,8 +42,49 @@ See the [example_templates](example_templates) directory for how to build a temp
 This reads the networks.py template and generates a valid Google Compute Engine Deployment Manager YAML
 config, reading values from a constants.py that is shared across your deployments.
 
-Instead of ```--action template```, ```--action create``` can be used instead to actually insert
-the template into Google Deployment Manager via API.
+### Local Validation Examples
+Stratosphere resources know about required parameters, so if you define a resource that is missing a parameter
+or has an invalid field, you'll get an error like this (without having to wait for the Deployment Manager error).
+
+##### Template defining a Firewall snippet:
+
+    Firewall(
+        name='{}-ssh'.format(self.env),
+        network="projects/{}/global/networks/{}".format(names.project, names.networkName),
+        allowed=[
+            FirewallAllowedPorts(
+                IPProtocol=FirewallAllowedPorts.TCP,
+                ports=[
+                    '22'
+                ]
+            ),
+        ]
+    )
+
+Results in this error:
+
+    ValueError: Either sourceRanges or sourceTags must be defined
+
+##### Name field validation
+
+    for subnetwork in constants.ENV[self.env]['subnetworks']:
+        self.add_resource(
+            Subnetwork(
+                name='SUBNETWORk-{}'.format(names.subnetworkName(subnetwork['zone'])),
+                region=names.zone_to_region(subnetwork['zone']),
+                description='{} - {} Subnetwork'.format(names.networkName, subnetwork['zone']),
+                ipCidrRange=subnetwork['cidr'],
+                network=network.Ref
+            )
+        )
+
+
+Results in this error (only lowercase characters are allowed in names):
+
+    TypeError: <class 'stratosphere.compute.Subnetwork'>: name is SUBNETWORk-mynetwork-us-central1-b-subnetwork, expected values defined in function:
+        @staticmethod
+        def name(name):
+            return ResourceValidators.regex_match('^(?:[a-z](?:[-a-z0-9]{0,61}[a-z0-9])?)$', name)
 
 
 

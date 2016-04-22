@@ -204,7 +204,7 @@ class InstanceTemplateProperty(GCPProperty):
         # at least one disk must be marked as boot
         boot_count = 0
         for disk in self.properties.get('disks'):
-            if disk.properties['boot'] == True:
+            if disk.properties.get('boot') == True:
                 boot_count += 1
                 # Boot disks must be persistent
                 if not disk.properties['type'] == InstanceTemplateDisksProperty.PERSISTENT:
