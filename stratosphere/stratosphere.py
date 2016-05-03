@@ -9,7 +9,6 @@ import sys
 import time
 
 import click
-import colorama
 from googleapiclient import errors
 
 from resources import Template
