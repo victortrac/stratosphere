@@ -211,8 +211,8 @@ class Instance(GCPResource):
                 if not disk.properties['type'] == InstanceTemplateDisksProperty.PERSISTENT:
                     raise ValueError('{} - Boot disks must be persistent!'.format(disk))
                 # Boot disks must have a source
-                if not disk.properties.get('initializeParams'):
-                    raise ValueError('{} - Boot disks must have initializeParams!'.format(disk))
+                if not disk.properties.get('initializeParams') and not disk.properties.get('source'):
+                    raise ValueError('{} - Boot disks without initializeParams must have source!'.format(disk))
         if not boot_count == 1:
             raise ValueError('{} - One disk must be marked as bootable!'.format(self.__class__))
 
