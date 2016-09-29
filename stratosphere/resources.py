@@ -57,8 +57,10 @@ class BaseGCPResource(object):
         return str('$(ref.{}.selfLink)'.format(self.name))
 
     def __hash__(self):
+        # Make a unique name for the resource
         hasher = hashlib.md5()
-        hasher.update(str(self.asObject()))
+        hasher.update(''.join([v for v in self.asObject().values() if
+                               isinstance(v, str)]).encode('utf-8'))
         return hasher.hexdigest()
 
     def _set_property(self, key, value):
@@ -109,10 +111,10 @@ class BaseGCPResource(object):
     def _raise_value(self, key, value, allowed_values):
         if hasattr(allowed_values, '__call__'):
             allowed_values = 'defined in function:\n{}'.format(inspect.getsource(allowed_values))
-        raise TypeError("{}: {} is {}, expected values {}".format(self.__class__,
-                                                                  key,
-                                                                  value,
-                                                                  allowed_values))
+        raise TypeError("{}: Property \'{}\' is set to \'{}\', expected values {}".format(self.__class__,
+                                                                                          key,
+                                                                                          value,
+                                                                                          allowed_values))
 
     def _toObject(self):
         if self.isValid():

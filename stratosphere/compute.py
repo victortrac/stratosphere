@@ -1,9 +1,11 @@
 from stratosphere.common import ResourceValidators
 from stratosphere.resources import GCPResource
-from stratosphere.compute_properties import BackendServiceBackend, InstanceTemplateProperty, InstanceGroupNamedPort, \
-        AutoscalingPolicy, FirewallAllowedPorts, UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
-    InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, InstanceTemplateSchedulingProperty, \
-    InstanceTemplateServiceAccountsProperty, InstanceTemplateTagsProperty
+from stratosphere.compute_properties import BackendServiceBackend, InstanceTemplateProperty, \
+    InstanceGroupNamedPort, AutoHealingPolicy, AutoscalingPolicy, FirewallAllowedPorts, \
+    UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
+    InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, \
+    InstanceTemplateSchedulingProperty, InstanceTemplateServiceAccountsProperty, \
+    InstanceTemplateTagsProperty
 
 
 class Address(GCPResource):
@@ -256,17 +258,26 @@ class Network(GCPResource):
 
 
 class RegionInstanceGroupManager(GCPResource):
-    resource_type = 'compute.alpha.regionInstanceGroupManagers'
+    resource_type = 'compute.beta.regionInstanceGroupManagers'
+
+    FAILOVER_ACTIONS = ['NO_FAILOVER']
     props = {
+        'autoHealingPolicies': ([AutoHealingPolicy], False),
+        'region': (str, True),
         'baseInstanceName': (str, True, ResourceValidators.base_instance_name),
         'description': (str, False),
-        'instanceTemplate': (str, True),  # URL
+        'failoverAction': (str, False, FAILOVER_ACTIONS),
+        'instanceTemplate': (str, True, ResourceValidators.is_url),
         'name': (str, True, ResourceValidators.name),
         'namedPorts': ([InstanceGroupNamedPort], False),
         'targetPools': ([TargetPool], False),
         'targetSize': (int, True),
         'zone': (str, False, ResourceValidators.zone)
     }
+
+    def validator(self):
+        if len(self.properties.get('autoHealingPolicies', [])) > 1:
+            raise ValueError('Only one AutoHealingPolicy is allowed')
 
 
 class Route(GCPResource):

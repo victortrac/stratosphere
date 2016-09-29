@@ -2,6 +2,13 @@ from stratosphere.common import ResourceValidators
 from stratosphere.resources import GCPProperty
 
 
+class AutoHealingPolicy(GCPProperty):
+    props = {
+        'healthCheck': (str, True),  # URL for healthcheck that signals autohealing
+        'initialDelaySec': (int, True)  # Number in seconds the IG waits before recreating instance
+    }
+
+
 class AutoscalingPolicyCpuUtilization(GCPProperty):
     props = {
         'utilizationTarget': (float, False)

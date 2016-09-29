@@ -35,6 +35,13 @@ class ResourceValidators(object):
     def is_valid_machine_type(project, zone, _type):
         pass
 
+    @staticmethod
+    def is_url(value):
+        if ResourceValidators.regex_match('^\$\(ref\..*.selfLink\)$', value):
+            return True
+        if ResourceValidators.regex_match('^http.*$', value):
+            return True
+        return False
 
 class ResourceNames(object):
     """
