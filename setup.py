@@ -13,7 +13,6 @@ setup(
         'Topic :: Software Development :: Code Generators',
         'Topic :: Software Development :: Libraries :: Python Modules',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',
     ],
     keywords='google cloud development automation',

@@ -1,5 +1,5 @@
-from common import ResourceValidators
-from resources import GCPProperty
+from stratosphere.common import ResourceValidators
+from stratosphere.resources import GCPProperty
 
 
 class AutoscalingPolicyCpuUtilization(GCPProperty):
@@ -12,9 +12,9 @@ class AutoscalingPolicyCustomMetricUtilizations(GCPProperty):
     UTILIZATION_TARGET_TYPE = ['GAUGE', 'DELTA_PER_SECOND', 'DELTA_PER_MINUTE']
 
     props = {
-        'metric': (basestring, True),
+        'metric': (str, True),
         'utilizationTarget': (float, False),
-        'utilizationTargetType': (basestring, False, UTILIZATION_TARGET_TYPE),
+        'utilizationTargetType': (str, False, UTILIZATION_TARGET_TYPE),
     }
 
 
@@ -32,9 +32,9 @@ class AutoscalingPolicy(GCPProperty):
         'loadBalancingUtilization': (AutoscalingPolicyLoadBalancingUtilization, False),
         'maxNumReplicas': (int, True),
         'minNumReplicas': (int, False),
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
-        'target': (basestring, True)  # URL
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
+        'target': (str, True)  # URL
     }
 
 
@@ -44,10 +44,10 @@ class BackendServiceBackend(GCPProperty):
     BALANCING_MODES = [UTILIZATION, RATE]
 
     props = {
-        'balancingMode': (basestring, True, BALANCING_MODES),
+        'balancingMode': (str, True, BALANCING_MODES),
         'capacityScaler': (float, False),
-        'description': (basestring, False),
-        'group': (basestring, True),
+        'description': (str, False),
+        'group': (str, True),
         'maxRate': (int, False),
         'maxRatePerInstance': (float, False),
         'maxUtilization': (float, False)
@@ -70,8 +70,8 @@ class FirewallAllowedPorts(GCPProperty):
     ALLOWED_PROTOCOLS = [TCP, UDP, ICMP, ESP, AH, SCTP]
 
     props = {
-        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
-        'ports': ([basestring], False)
+        'IPProtocol': (str, True, ALLOWED_PROTOCOLS),
+        'ports': ([str], False)
     }
 
     def validator(self):
@@ -82,8 +82,8 @@ class FirewallAllowedPorts(GCPProperty):
 
 class MetadataProperty(GCPProperty):
     props = {
-        'key': (basestring, True),
-        'value': (basestring, True)
+        'key': (str, True),
+        'value': (str, True)
     }
 
 
@@ -94,10 +94,10 @@ class InstanceTemplateDiskInitializeParamsProperty(GCPProperty):
     DISK_TYPES = [LOCAL, SSD, STANDARD]
 
     props = {
-        'diskName': (basestring, False),
+        'diskName': (str, False),
         'diskSizeGb': (int, True),
-        'diskType': (basestring, False, DISK_TYPES),
-        'sourceImage': (basestring, False)
+        'diskType': (str, False, DISK_TYPES),
+        'sourceImage': (str, False)
     }
 
 
@@ -108,14 +108,14 @@ class InstanceTemplateDisksProperty(GCPProperty):
     props = {
         'autoDelete': (bool, False),
         'boot': (bool, True),
-        'deviceName': (basestring, False),
+        'deviceName': (str, False),
         'index': (int, False),
         'initializeParams': (InstanceTemplateDiskInitializeParamsProperty, False),
-        'interface': (basestring, False),
-        'mode': (basestring, False),
-        'source': (basestring, False),
+        'interface': (str, False),
+        'mode': (str, False),
+        'source': (str, False),
         'sizeGb': (int, False),
-        'type': (basestring, True, VALID_TYPES)
+        'type': (str, True, VALID_TYPES)
     }
 
     def validator(self):
@@ -143,17 +143,17 @@ class InstanceTemplateNetworkInterfaceAccessConfigProperty(GCPProperty):
     VALID_TYPES = [ONE_TO_ONE_NAT, ]
 
     props = {
-        'name': (basestring, True),
-        'natIP': (basestring, False),
-        'type': (basestring, True, VALID_TYPES)
+        'name': (str, True),
+        'natIP': (str, False),
+        'type': (str, True, VALID_TYPES)
     }
 
 
 class InstanceTemplateNetworkInterfaceProperty(GCPProperty):
     props = {
         'accessConfigs': ([InstanceTemplateNetworkInterfaceAccessConfigProperty], True),
-        'network': (basestring, False),  # URL of network
-        'subnetwork': (basestring, False),  # URL of subnetwork
+        'network': (str, False),  # URL of network
+        'subnetwork': (str, False),  # URL of subnetwork
     }
 
     def validator(self):
@@ -168,31 +168,31 @@ class InstanceTemplateSchedulingProperty(GCPProperty):
 
     props = {
         'automaticRestart': (bool, False),
-        'onHostMaintenance': (basestring, False, VALID_ONHOSTSMAINTENANCE),
+        'onHostMaintenance': (str, False, VALID_ONHOSTSMAINTENANCE),
         'preemptible': (bool, False)
     }
 
 
 class InstanceTemplateServiceAccountsProperty(GCPProperty):
     props = {
-        'email': (basestring, False),
-        'scopes': ([basestring], True)
+        'email': (str, False),
+        'scopes': ([str], True)
     }
 
 
 class InstanceTemplateTagsProperty(GCPProperty):
     props = {
         'fingerprint': (bytes, False),
-        'items': ([basestring], False)
+        'items': ([str], False)
     }
 
 
 class InstanceTemplateProperty(GCPProperty):
     props = {
-        'description': (basestring, False),
+        'description': (str, False),
         'canIpForward': (bool, False),
         'disks': ([InstanceTemplateDisksProperty], True),
-        'machineType': (basestring, True),  # ResourceValidators.is_valid_machine_type),
+        'machineType': (str, True),  # ResourceValidators.is_valid_machine_type),
         'metadata': (InstanceTemplateMetadataProperty, False),
         'networkInterfaces': ([InstanceTemplateNetworkInterfaceProperty], True),
         'scheduling': (InstanceTemplateSchedulingProperty, False),
@@ -218,39 +218,39 @@ class InstanceTemplateProperty(GCPProperty):
 
 class InstanceGroupNamedPort(GCPProperty):
     props = {
-        'name': (basestring, True, ResourceValidators.name),
+        'name': (str, True, ResourceValidators.name),
         'port': (int, True)
     }
 
 
 class UrlMapHostRule(GCPProperty):
     props = {
-        'description': (basestring, False),
-        'hosts': ([basestring], True),
-        'pathMatcher': (basestring, True)
+        'description': (str, False),
+        'hosts': ([str], True),
+        'pathMatcher': (str, True)
     }
 
 
 class UrlMapPathMatcherPathRule(GCPProperty):
     props = {
-        'paths': ([basestring], True),
-        'service': (basestring, True)
+        'paths': ([str], True),
+        'service': (str, True)
     }
 
 
 class UrlMapPathMatcher(GCPProperty):
     props = {
-        'defaultService': (basestring, True),
-        'description': (basestring, False),
-        'name': (basestring, True),
+        'defaultService': (str, True),
+        'description': (str, False),
+        'name': (str, True),
         'pathRules': ([UrlMapPathMatcherPathRule], False)
     }
 
 
 class UrlMapTests(GCPProperty):
     props = {
-        'description': (basestring, False),
-        'host': (basestring, True),
-        'path': (basestring, True),
-        'service': (basestring, True)
+        'description': (str, False),
+        'host': (str, True),
+        'path': (str, True),
+        'service': (str, True)
     }

@@ -11,8 +11,8 @@ import time
 import click
 from googleapiclient import errors
 
-from resources import Template
-from utils import get_google_auth
+from stratosphere.resources import Template
+from stratosphere.utils import get_google_auth
 
 
 logger = logging.getLogger(__name__)
@@ -71,12 +71,12 @@ def wait_for_completion(project, result):
         print('Stack action complete.')
 
 def confirm_action():
-    # raw_input returns the empty string for "enter"
+    # input returns the empty string for "enter"
     yes = ('yes', 'y', 'ye', '')
     no = ('no', 'n')
 
     sys.stdout.write("\nContinue? (yes/no) ")
-    choice = raw_input().lower().strip()
+    choice = input().lower().strip()
     if choice in yes:
         sys.stdout.write('Running in ')
         sys.stdout.flush()
@@ -98,7 +98,7 @@ def apply_deployment(project, template):
         'description': 'project: {}, name: {}'.format(project, template.name),
         'target': {
             'config': {
-                'content': unicode(template)
+                'content': str(template)
             }
         }
     }
@@ -109,7 +109,7 @@ def apply_deployment(project, template):
             body['fingerprint'] = deployment.get('fingerprint')
             changed = False
             for diff in color_diff(difflib.unified_diff(get_manifest(project, deployment)['config']['content'].splitlines(),
-                                                        unicode(template).splitlines(),
+                                                        str(template).splitlines(),
                                                         fromfile='Existing template', tofile='Proposed template')):
                 changed = True
                 print(diff)
@@ -174,6 +174,9 @@ def main(project, env, action, verbose, format, template_path):
     logger.info("Log level: {}".format(level))
 
     if action in ['apply', 'template']:
+        if template_path is None:
+            logging.error('A path to a template file is required for {}'.format(action))
+            sys.exit(1)
         template_class = load_template_module(template_path)
         template = template_class(project, env)
 

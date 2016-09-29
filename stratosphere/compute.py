@@ -1,7 +1,7 @@
-from common import ResourceValidators
-from resources import GCPResource
-from compute_properties import BackendServiceBackend, InstanceTemplateProperty, InstanceGroupNamedPort, AutoscalingPolicy, \
-    FirewallAllowedPorts, UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
+from stratosphere.common import ResourceValidators
+from stratosphere.resources import GCPResource
+from stratosphere.compute_properties import BackendServiceBackend, InstanceTemplateProperty, InstanceGroupNamedPort, \
+        AutoscalingPolicy, FirewallAllowedPorts, UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
     InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, InstanceTemplateSchedulingProperty, \
     InstanceTemplateServiceAccountsProperty, InstanceTemplateTagsProperty
 
@@ -9,17 +9,17 @@ from compute_properties import BackendServiceBackend, InstanceTemplateProperty, 
 class Address(GCPResource):
     resource_type = 'compute.v1.address'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
-        'region': (basestring, True)
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
+        'region': (str, True)
     }
 
 
 class GlobalAddress(GCPResource):
     resource_type = 'compute.v1.globalAddress'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name)
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name)
     }
 
 
@@ -29,22 +29,22 @@ class Autoscaler(GCPResource):
     POLICY_TYPES = ['cpuUtilization', 'customMetricUtilizations', 'loadBalancingUtilization']
     props = {
         'autoscalingPolicy': (AutoscalingPolicy, False),
-        'description': (basestring, False),
-        'name': (basestring, True),
-        'target': (basestring, True)  # URL
+        'description': (str, False),
+        'name': (str, True),
+        'target': (str, True)  # URL
     }
 
 
 class Disk(GCPResource):
     resource_type = 'compute.v1.disk'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True),
-        'sizeGb': (long, True),
-        'sourceImage': (basestring, False),
-        'sourceSnapshot': (basestring, False),
-        'type': (basestring, True),
-        'zone': (basestring, True)
+        'description': (str, False),
+        'name': (str, True),
+        'sizeGb': (int, True),
+        'sourceImage': (str, False),
+        'sourceSnapshot': (str, False),
+        'type': (str, True),
+        'zone': (str, True)
     }
 
     def validator(self):
@@ -63,44 +63,44 @@ class BackendService(GCPResource):
     resource_type = 'compute.v1.backendService'
     props = {
         'backends': ([BackendServiceBackend], True),
-        'description': (basestring, False),
-        'healthChecks': ([basestring], True),
-        'name': (basestring, True, ResourceValidators.name),
+        'description': (str, False),
+        'healthChecks': ([str], True),
+        'name': (str, True, ResourceValidators.name),
         'port': (int, True),
-        'portName': (basestring, True),
-        'protocol': (basestring, True, ALLOWED_PROTOCOLS)
+        'portName': (str, True),
+        'protocol': (str, True, ALLOWED_PROTOCOLS)
     }
 
 
 class TargetHttpProxy(GCPResource):
     resource_type = 'compute.v1.targetHttpProxy'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
-        'urlMap': (basestring, True)
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
+        'urlMap': (str, True)
     }
 
 
 class TargetHttpsProxy(GCPResource):
     resource_type = 'compute.v1.targetHttpsProxy'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
-        'urlMap': (basestring, True),
-        'sslCertificates': ([basestring], True)
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
+        'urlMap': (str, True),
+        'sslCertificates': ([str], True)
     }
 
 
 class Firewall(GCPResource):
     resource_type = 'compute.v1.firewall'
     props = {
-        'name': (basestring, True, ResourceValidators.name),
+        'name': (str, True, ResourceValidators.name),
         'allowed': ([FirewallAllowedPorts], True),
-        'description': (basestring, False),
-        'network': (basestring, True),
-        'sourceRanges': ([basestring], False),
-        'sourceTags': ([basestring], False),
-        'targetTags': ([basestring], False)
+        'description': (str, False),
+        'network': (str, True),
+        'sourceRanges': ([str], False),
+        'sourceTags': ([str], False),
+        'targetTags': ([str], False)
     }
 
     def validator(self):
@@ -118,13 +118,13 @@ class ForwardingRule(GCPResource):
 
     resource_type = 'compute.v1.forwardingRule'
     props = {
-        'name': (basestring, True, ResourceValidators.name),
-        'description': (basestring, False),
-        'IPAddress': (basestring, False),
-        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
-        'portRange': (basestring, False),
-        'target': (basestring, True),
-        'region': (basestring, True)
+        'name': (str, True, ResourceValidators.name),
+        'description': (str, False),
+        'IPAddress': (str, False),
+        'IPProtocol': (str, True, ALLOWED_PROTOCOLS),
+        'portRange': (str, False),
+        'target': (str, True),
+        'region': (str, True)
     }
 
     def validator(self):
@@ -144,12 +144,12 @@ class GlobalForwardingRule(GCPResource):
 
     resource_type = 'compute.v1.globalForwardingRule'
     props = {
-        'name': (basestring, True, ResourceValidators.name),
-        'description': (basestring, False),
-        'IPAddress': (basestring, False),
-        'IPProtocol': (basestring, True, ALLOWED_PROTOCOLS),
-        'portRange': (basestring, False),
-        'target': (basestring, True)
+        'name': (str, True, ResourceValidators.name),
+        'description': (str, False),
+        'IPAddress': (str, False),
+        'IPProtocol': (str, True, ALLOWED_PROTOCOLS),
+        'portRange': (str, False),
+        'target': (str, True)
     }
 
     def validator(self):
@@ -163,12 +163,12 @@ class HttpHealthCheck(GCPResource):
     resource_type = 'compute.v1.httpHealthCheck'
     props = {
         'checkIntervalSec': (int, False),
-        'description': (basestring, False),
+        'description': (str, False),
         'healthyThreshold': (int, False),
-        'host': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
+        'host': (str, False),
+        'name': (str, True, ResourceValidators.name),
         'port': (int, False),
-        'requestPath': (basestring, False),
+        'requestPath': (str, False),
         'timeoutSec': (int, False),
         'unhealthyThreshold': (int, False)
     }
@@ -177,28 +177,28 @@ class HttpHealthCheck(GCPResource):
 class InstanceGroup(GCPResource):
     resource_type = 'compute.v1.instanceGroup'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
         'namedPorts': ([InstanceGroupNamedPort], False),
-        'network': (basestring, True),  # URL
-        'subnetwork': (basestring, False)  # URL
+        'network': (str, True),  # URL
+        'subnetwork': (str, False)  # URL
     }
 
 
 class Instance(GCPResource):
     resource_type = 'compute.v1.instance'
     props = {
-        'name': (basestring, True, ResourceValidators.name),
-        'description': (basestring, False),
+        'name': (str, True, ResourceValidators.name),
+        'description': (str, False),
         'canIpForward': (bool, False),
         'disks': ([InstanceTemplateDisksProperty], True),
-        'machineType': (basestring, True),
+        'machineType': (str, True),
         'metadata': (InstanceTemplateMetadataProperty, False),
         'networkInterfaces': ([InstanceTemplateNetworkInterfaceProperty], True),
         'scheduling': (InstanceTemplateSchedulingProperty, False),
         'serviceAccounts': ([InstanceTemplateServiceAccountsProperty], False),
         'tags': (InstanceTemplateTagsProperty, False),
-        'zone': (basestring, True)
+        'zone': (str, True)
     }
 
     def validator(self):
@@ -224,22 +224,22 @@ class TargetPool(GCPResource):
 class InstanceGroupManager(GCPResource):
     resource_type = 'compute.v1.instanceGroupManager'
     props = {
-        'baseInstanceName': (basestring, True, ResourceValidators.base_instance_name),
-        'description': (basestring, False),
-        'instanceTemplate': (basestring, True),  # URL
-        'name': (basestring, True, ResourceValidators.name),
+        'baseInstanceName': (str, True, ResourceValidators.base_instance_name),
+        'description': (str, False),
+        'instanceTemplate': (str, True),  # URL
+        'name': (str, True, ResourceValidators.name),
         'namedPorts': ([InstanceGroupNamedPort], False),
         'targetPools': ([TargetPool], False),
         'targetSize': (int, True),
-        'zone': (basestring, True, ResourceValidators.zone)
+        'zone': (str, True, ResourceValidators.zone)
     }
 
 
 class InstanceTemplate(GCPResource):
     resource_type = 'compute.v1.instanceTemplate'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
         'properties': (InstanceTemplateProperty, True),
     }
 
@@ -247,41 +247,41 @@ class InstanceTemplate(GCPResource):
 class Network(GCPResource):
     resource_type = 'compute.v1.network'
     props = {
-        'IPv4Range': (basestring, False),
+        'IPv4Range': (str, False),
         'autoCreateSubnetworks': (bool, False),
-        'description': (basestring, False),
-        'gatewayIPv4': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
+        'description': (str, False),
+        'gatewayIPv4': (str, False),
+        'name': (str, True, ResourceValidators.name),
     }
 
 
 class RegionInstanceGroupManager(GCPResource):
     resource_type = 'compute.alpha.regionInstanceGroupManagers'
     props = {
-        'baseInstanceName': (basestring, True, ResourceValidators.base_instance_name),
-        'description': (basestring, False),
-        'instanceTemplate': (basestring, True),  # URL
-        'name': (basestring, True, ResourceValidators.name),
+        'baseInstanceName': (str, True, ResourceValidators.base_instance_name),
+        'description': (str, False),
+        'instanceTemplate': (str, True),  # URL
+        'name': (str, True, ResourceValidators.name),
         'namedPorts': ([InstanceGroupNamedPort], False),
         'targetPools': ([TargetPool], False),
         'targetSize': (int, True),
-        'zone': (basestring, False, ResourceValidators.zone)
+        'zone': (str, False, ResourceValidators.zone)
     }
 
 
 class Route(GCPResource):
     resource_type = 'compute.v1.route'
     props = {
-        'description': (basestring, False),
-        'destRange': (basestring, True, ResourceValidators.ipAddress),
-        'name': (basestring, True, ResourceValidators.name),
-        'network': (basestring, True),  # URL
-        'nextHopGateway': (basestring, False),  # URL
-        'nextHopInstance': (basestring, False),  # URL
-        'nextHopIp': (basestring, False, ResourceValidators.ipAddress),
-        'nextHopVpnTunnel': (basestring, False),  # URL
+        'description': (str, False),
+        'destRange': (str, True, ResourceValidators.ipAddress),
+        'name': (str, True, ResourceValidators.name),
+        'network': (str, True),  # URL
+        'nextHopGateway': (str, False),  # URL
+        'nextHopInstance': (str, False),  # URL
+        'nextHopIp': (str, False, ResourceValidators.ipAddress),
+        'nextHopVpnTunnel': (str, False),  # URL
         'priority': (int, False, range(1, 65536)),
-        'tags': ([basestring], True),  # Bug in GCP: requires at least an empty list
+        'tags': ([str], True),  # Bug in GCP: requires at least an empty list
     }
 
     def validator(self):
@@ -294,30 +294,30 @@ class Route(GCPResource):
 class Subnetwork(GCPResource):
     resource_type = 'compute.v1.subnetworks'
     props = {
-        'description': (basestring, False),
-        'region': (basestring, True),
-        'ipCidrRange': (basestring, True, ResourceValidators.ipAddress),
-        'name': (basestring, True, ResourceValidators.name),
-        'network': (basestring, True)
+        'description': (str, False),
+        'region': (str, True),
+        'ipCidrRange': (str, True, ResourceValidators.ipAddress),
+        'name': (str, True, ResourceValidators.name),
+        'network': (str, True)
     }
 
 
 class TargetVpnGateway(GCPResource):
     resource_type = 'compute.v1.targetVpnGateway'
     props = {
-        'description': (basestring, False),
-        'name': (basestring, True, ResourceValidators.name),
-        'network': (basestring, True),
-        'region': (basestring, True),
+        'description': (str, False),
+        'name': (str, True, ResourceValidators.name),
+        'network': (str, True),
+        'region': (str, True),
     }
 
 
 class UrlMap(GCPResource):
     resource_type = 'compute.v1.urlMap'
     props = {
-        'name': (basestring, True, ResourceValidators.name),
-        'defaultService': (basestring, True),
-        'description': (basestring, False),
+        'name': (str, True, ResourceValidators.name),
+        'defaultService': (str, True),
+        'description': (str, False),
         'hostRules': ([UrlMapHostRule], True),
         'pathMatchers': ([UrlMapPathMatcher], True),
         'tests': ([UrlMapTests], False)
@@ -327,13 +327,13 @@ class UrlMap(GCPResource):
 class VpnTunnel(GCPResource):
     resource_type = 'compute.v1.vpnTunnel'
     props = {
-        'description': (basestring, False),
+        'description': (str, False),
         'ikeVersion': (int, False, [1, 2]),
-        'localTrafficSelector': ([basestring], True, ResourceValidators.ipAddress),
-        'name': (basestring, True, ResourceValidators.name),
-        'peerIp': (basestring, True, ResourceValidators.ipAddress),
-        'region': (basestring, True),
-        'sharedSecret': (basestring, True),
-        'sharedSecretHash': (basestring, False),
-        'targetVpnGateway': (basestring, True)  # URL
+        'localTrafficSelector': ([str], True, ResourceValidators.ipAddress),
+        'name': (str, True, ResourceValidators.name),
+        'peerIp': (str, True, ResourceValidators.ipAddress),
+        'region': (str, True),
+        'sharedSecret': (str, True),
+        'sharedSecretHash': (str, False),
+        'targetVpnGateway': (str, True)  # URL
     }

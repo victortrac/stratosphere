@@ -1,5 +1,6 @@
 from stratosphere.resources import Template
-from stratosphere.compute import Network, Subnetwork
+from stratosphere.compute import Firewall, Network, Subnetwork
+from stratosphere.compute_properties import FirewallAllowedPorts
 
 import constants
 
@@ -10,7 +11,7 @@ class Networks(Template):
     def configure(self):
         network = Network(
             name='{}-network'.format(self.env),
-            description='{} - MultiAZ Network'.format(self.name),
+            description='{} - Multi-region Network'.format(self.name),
             autoCreateSubnetworks=False,
         )
 
@@ -19,15 +20,32 @@ class Networks(Template):
         for subnetwork in constants.ENV[self.env]['subnetworks']:
             self.add_resource(
                 Subnetwork(
-                    name='{}-{}-subnetwork'.format(self.env, subnetwork['zone']),
-                    region=subnetwork['zone'][:subnetwork['zone'].rfind('-')],
-                    description='{} - {} Subnetwork'.format(self.env, subnetwork['zone']),
+                    name='{}-{}-subnetwork'.format(self.env, subnetwork['region']),
+                    region=subnetwork['region'],
+                    description='{} - {} Subnetwork'.format(self.env, subnetwork['region']),
                     ipCidrRange=subnetwork['cidr'],
                     network=network.Ref
                 )
             )
 
+        firewall_rules = [
+            Firewall(
+                name='{}-internal-ssh'.format(network.name),
+                network=network.Ref,
+                allowed=[
+                    FirewallAllowedPorts(
+                        IPProtocol=FirewallAllowedPorts.TCP,
+                        ports=['22']
+                    ),
+                    FirewallAllowedPorts(
+                        IPProtocol=FirewallAllowedPorts.ICMP
+                    )
+                ],
+                sourceRanges=[
+                    constants.ENV[self.env]['cidr']
+                ]
+            )
+        ]
 
-def GenerateConfig(context):
-    return unicode(Networks(context.env['name']))
+        [self.add_resource(f) for f in firewall_rules]
 

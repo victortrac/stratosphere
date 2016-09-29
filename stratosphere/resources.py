@@ -19,7 +19,7 @@ class Template(object):
 
     @property
     def name(self):
-        return unicode(self._name)
+        return str(self._name)
 
     def add_resource(self, resource):
         self.resources.append(resource)
@@ -37,7 +37,7 @@ class Template(object):
         if not self.configured:
             self.configure()
             self.configured = True
-        return unicode(self.formatter())
+        return str(self.formatter())
 
 
 class BaseGCPResource(object):
@@ -54,11 +54,11 @@ class BaseGCPResource(object):
 
     @property
     def Ref(self):
-        return unicode('$(ref.{}.selfLink)'.format(self.name))
+        return str('$(ref.{}.selfLink)'.format(self.name))
 
     def __hash__(self):
         hasher = hashlib.md5()
-        hasher.update(unicode(self.asObject()))
+        hasher.update(str(self.asObject()))
         return hasher.hexdigest()
 
     def _set_property(self, key, value):
