@@ -199,7 +199,7 @@ class InstanceTemplateProperty(GCPProperty):
         'description': (str, False),
         'canIpForward': (bool, False),
         'disks': ([InstanceTemplateDisksProperty], True),
-        'machineType': (str, True),  # ResourceValidators.is_valid_machine_type),
+        'machineType': (str, True, ResourceValidators.is_valid_machine_type),
         'metadata': (InstanceTemplateMetadataProperty, False),
         'networkInterfaces': ([InstanceTemplateNetworkInterfaceProperty], True),
         'scheduling': (InstanceTemplateSchedulingProperty, False),

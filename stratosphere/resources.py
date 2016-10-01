@@ -41,6 +41,10 @@ class Template(object):
 
 
 class BaseGCPResource(object):
+    # The cluster API is different from the other GCP APIs.  Doesn't accept a 'name' field
+    # as a property field. Sigh google.
+    INCLUDE_NAME_PROPERTY = True
+
     def __init__(self, **kwargs):
         self.properties = {}
         for k, v in kwargs.items():
@@ -68,10 +72,11 @@ class BaseGCPResource(object):
             type_name = getattr(self, 'resource_type', self.__class__.__name__)
             raise AttributeError('{} object does not support attribute {}'.format(type_name, key))
         expected_type = self.props[key][0]
+        # The third field in a property is a validator function or a valid list of values
         if len(self.props[key]) == 3:
             allowed_values = self.props[key][2]
+            # allowed_values is a validator function
             if hasattr(allowed_values, '__call__'):
-                # allowed_values is a validator function
                 if isinstance(value, list):
                     # validate a list of items (if item is a list)
                     logger.debug("Validating list of items for key={}".format(key))
@@ -83,11 +88,13 @@ class BaseGCPResource(object):
                 else:
                     # validate single item
                     logger.debug("Validating item for key={}".format(key))
-                    logger.log(5, "Validating key='{}', value='{}' against validator function:\n{}" \
+                    logger.log(5, "Validating key='{}', value='{}' against validator function:\n{}"\
                         .format(key, value,inspect.getsource(allowed_values)))
                     if not allowed_values(value):
                         self._raise_value(key, value, allowed_values)
-            elif value not in allowed_values:
+            # allowed_values is a list. We want to make sure the value is a
+            # subset of the allowed values.
+            elif not (set(value) <= set(allowed_values)):
                 self._raise_value(key, value, allowed_values)
         if isinstance(expected_type, list):
             if not isinstance(value, list):
@@ -120,6 +127,8 @@ class BaseGCPResource(object):
         if self.isValid():
             _object = {}
             for k, v in self.properties.items():
+                if self.INCLUDE_NAME_PROPERTY is False and k == 'name':
+                    continue
                 if isinstance(v, list):
                     v2 = []
                     for item in v:

@@ -32,8 +32,27 @@ class ResourceValidators(object):
             raise ValueError('Invalid CIDR - {}'.format(network))
 
     @staticmethod
-    def is_valid_machine_type(project, zone, _type):
-        pass
+    def is_valid_machine_type(_type):
+        return _type in [
+            'n1-standard-1',
+            'n1-standard-2',
+            'n1-standard-4',
+            'n1-standard-8',
+            'n1-standard-16',
+            'n1-standard-32',
+            'n1-highmem-2',
+            'n1-highmem-4',
+            'n1-highmem-8',
+            'n1-highmem-16',
+            'n1-highmem-32',
+            'n1-highcpu-2',
+            'n1-highcpu-4',
+            'n1-highcpu-8',
+            'n1-highcpu-16',
+            'n1-highcpu-32',
+            'f1-micro',
+            'g1-small',
+        ]
 
     @staticmethod
     def is_url(value):

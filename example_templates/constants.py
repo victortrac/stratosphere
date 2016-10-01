@@ -22,6 +22,17 @@ ENV = {
                 "region": "asia-east1",
                 "cidr": "10.128.128.0/20"
             }
+        ],
+        'gke_clusters': [
+            {
+                'name': 'my-cluster',
+                'node_count': 1,
+                'machine_type': 'n1-standard-1',
+                'disk_size': 100,
+                'subnetwork': 'us-central1',
+                'zone': 'us-central1-b',  #  Primary zone
+                'locations': ['us-central1-a', 'us-central1-b', 'us-central1-c']  #  Additional zones
+            }
         ]
     },
     "prod": {
