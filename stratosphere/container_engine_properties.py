@@ -53,7 +53,7 @@ class MasterAuth(GCPProperty):
 
 
 class NodeConfigProperty(GCPProperty):
-    IMAGE_TYPES = ['container_vm', 'gci-dev', 'gci-beta', 'gci-stable']
+    IMAGE_TYPES = ['CONTAINER_VM', 'gci-dev', 'gci-beta', 'gci-stable']
 
     props = {
         'machineType': (str, False, ResourceValidators.is_valid_machine_type),
@@ -85,8 +85,6 @@ class NodePoolAutoScalingProperty(GCPProperty):
 
 
 class NodePoolProperty(GCPProperty):
-    resource_type = 'container.v1.cluster'
-
     props = {
         'name': (str, True, ResourceValidators.name),
         'config': (NodeConfigProperty, True),
@@ -118,7 +116,7 @@ class ClusterProperties(GCPProperty):
 
     props = {
         'description': (str, False),
-        'initialNodeCount': (int, True),
+        'initialNodeCount': (int, False),
         'nodeConfig': (NodeConfigProperty, False),
         'masterAuth': (MasterAuth, False),
         'loggingService': (str, False, LOGGING_SERVICES),
@@ -132,8 +130,12 @@ class ClusterProperties(GCPProperty):
     }
 
     def validator(self):
-        # Must only specific initialNodeCount or nodePool
+        # Require either nodePools or (nodeConfig and initialNodeCount)
+        if not (self.properties.get('nodePools') or
+                (self.properties.get('initialNodeCount') and self.properties.get('nodeConfig'))):
+            raise ValueError('Either nodePools or (nodeConfig and initialNodeCount) are required.')
+
         if (self.properties.get('initialNodeCount') or self.properties.get('nodeConfig')) \
                 and self.properties.get('nodePools'):
-            raise ValueError('nodePools can not be used in with initialNodeCount or nodeConfig')
+            raise ValueError('nodePools can not be used in with initialNodeCount or nodeConfig.')
 

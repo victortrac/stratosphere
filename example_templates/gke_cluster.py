@@ -1,6 +1,7 @@
 from stratosphere.resources import Template
 from stratosphere.container_engine import Cluster
-from stratosphere.container_engine_properties import ClusterProperties, NodeConfigProperty
+from stratosphere.container_engine_properties import ClusterProperties, NodePoolProperty, \
+    NodePoolAutoScalingProperty, NodeConfigProperty
 
 import constants
 
@@ -37,25 +38,35 @@ class GKECluster(Template):
                 zone=cluster.get('zone'),
                 cluster=ClusterProperties(
                     description='{} {} GKE Cluster'.format(self.env, cluster.get('name')),
-                    initialNodeCount=cluster.get('node_count'),
-                    nodeConfig=NodeConfigProperty(
-                        machineType=cluster.get('machine_type'),
-                        diskSizeGb=cluster.get('disk_size'),
-                        oauthScopes=[
-                            "https://www.googleapis.com/auth/bigquery",
-                            "https://www.googleapis.com/auth/bigtable.data",
-                            "https://www.googleapis.com/auth/cloud-platform",
-                            "https://www.googleapis.com/auth/compute",
-                            "https://www.googleapis.com/auth/datastore",
-                            "https://www.googleapis.com/auth/devstorage.read_write",
-                            "https://www.googleapis.com/auth/logging.write",
-                            "https://www.googleapis.com/auth/monitoring",
-                            "https://www.googleapis.com/auth/projecthosting",
-                            "https://www.googleapis.com/auth/pubsub",
-                            "https://www.googleapis.com/auth/service.management.readonly",
-                            "https://www.googleapis.com/auth/servicecontrol",
-                        ]
-                    ),
+                    nodePools=[
+                        NodePoolProperty(
+                            name='{}-pool-1'.format(cluster.get('name')),
+                            config=NodeConfigProperty(
+                                machineType=cluster.get('machine_type'),
+                                diskSizeGb=cluster.get('disk_size'),
+                                oauthScopes=[
+                                    "https://www.googleapis.com/auth/bigquery",
+                                    "https://www.googleapis.com/auth/bigtable.data",
+                                    "https://www.googleapis.com/auth/cloud-platform",
+                                    "https://www.googleapis.com/auth/compute",
+                                    "https://www.googleapis.com/auth/datastore",
+                                    "https://www.googleapis.com/auth/devstorage.read_write",
+                                    "https://www.googleapis.com/auth/logging.write",
+                                    "https://www.googleapis.com/auth/monitoring",
+                                    "https://www.googleapis.com/auth/projecthosting",
+                                    "https://www.googleapis.com/auth/pubsub",
+                                    "https://www.googleapis.com/auth/service.management.readonly",
+                                    "https://www.googleapis.com/auth/servicecontrol",
+                                ]
+                            ),
+                            initialNodeCount=1,
+                            autoscaling=NodePoolAutoScalingProperty(
+                                enabled=True,
+                                minNodeCount=1,
+                                maxNodeCount=3
+                            )
+                        )
+                    ],
                     network='{}-network'.format(self.env),
                     subnetwork='{}-{}-subnetwork'.format(self.env, cluster.get('subnetwork')),
                     locations=cluster.get('locations'),
