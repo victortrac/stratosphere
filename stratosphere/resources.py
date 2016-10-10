@@ -94,6 +94,11 @@ class BaseGCPResource(object):
                         self._raise_value(key, value, allowed_values)
             # allowed_values is a list. We want to make sure the value is a
             # subset of the allowed values.
+            
+            # if the incoming value is string, make a single-element set of that string instead of a set of chars in the string
+            elif isinstance(value, str) and not (set([value]) <= set(allowed_values)):
+                self._raise_value(key, value, allowed_values)
+            # else make a set of the incoming values and compare
             elif not (set(value) <= set(allowed_values)):
                 self._raise_value(key, value, allowed_values)
         if isinstance(expected_type, list):
