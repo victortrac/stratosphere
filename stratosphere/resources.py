@@ -75,6 +75,9 @@ class BaseGCPResource(object):
         # The third field in a property is a validator function or a valid list of values
         if len(self.props[key]) == 3:
             allowed_values = self.props[key][2]
+            if isinstance(value, str):
+                # We turn the string into a set of 1 so we can do set comparison below
+                _value_set = set([value])
             # allowed_values is a validator function
             if hasattr(allowed_values, '__call__'):
                 if isinstance(value, list):
@@ -92,14 +95,8 @@ class BaseGCPResource(object):
                         .format(key, value,inspect.getsource(allowed_values)))
                     if not allowed_values(value):
                         self._raise_value(key, value, allowed_values)
-            # allowed_values is a list. We want to make sure the value is a
-            # subset of the allowed values.
-            
-            # if the incoming value is string, make a single-element set of that string instead of a set of chars in the string
-            elif isinstance(value, str) and not (set([value]) <= set(allowed_values)):
-                self._raise_value(key, value, allowed_values)
-            # else make a set of the incoming values and compare
-            elif not (set(value) <= set(allowed_values)):
+            # allowed_values is a set of valid strings
+            elif not (_value_set <= set(allowed_values)):
                 self._raise_value(key, value, allowed_values)
         if isinstance(expected_type, list):
             if not isinstance(value, list):

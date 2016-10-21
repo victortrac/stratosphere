@@ -29,6 +29,7 @@ class Networks(Template):
             )
 
         firewall_rules = [
+            # This allows SSH access from any machine in the network to another
             Firewall(
                 name='{}-internal-ssh'.format(network.name),
                 network=network.Ref,
