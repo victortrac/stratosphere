@@ -11,8 +11,13 @@ Stratosphere is inspired by [Troposphere](https://github.com/cloudtools/troposph
 * Highly opinionated about naming to enforce consistent naming across deployments
 
 ## Installation
-Git clone this repository, then:
+Create a python3 virtualenv, Git clone this repository, run installer:
 
+    # virtualenv --python=/usr/bin/python3 stratosphere   # only tested on python3
+    # source stratosphere/bin/activate
+    # cd ~/code/   <- or whever you want to put temporary stratosphere files
+    # git clone https://github.com/victortrac/stratosphere
+    # cd stratosphere
     # python setup.py install
 
 You'll need to get a valid OAuth auth JSON file to interact with the GCP DM API. This is most

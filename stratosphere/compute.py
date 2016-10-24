@@ -1,11 +1,21 @@
-from stratosphere.common import ResourceValidators
-from stratosphere.resources import GCPResource
-from stratosphere.compute_properties import BackendServiceBackend, InstanceTemplateProperty, \
-    InstanceGroupNamedPort, AutoHealingPolicy, AutoscalingPolicy, FirewallAllowedPorts, \
-    UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
-    InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, \
-    InstanceTemplateSchedulingProperty, InstanceTemplateServiceAccountsProperty, \
-    InstanceTemplateTagsProperty
+try:
+    from stratosphere.common import ResourceValidators
+    from stratosphere.resources import GCPResource
+    from stratosphere.compute_properties import BackendServiceBackend, InstanceTemplateProperty, \
+            InstanceGroupNamedPort, AutoHealingPolicy, AutoscalingPolicy, FirewallAllowedPorts, \
+            UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
+            InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, \
+            InstanceTemplateSchedulingProperty, InstanceTemplateServiceAccountsProperty, \
+            InstanceTemplateTagsProperty
+except ImportError:
+    from common import ResourceValidators
+    from resources import GCPResource
+    from compute_properties import BackendServiceBackend, InstanceTemplateProperty, \
+        InstanceGroupNamedPort, AutoHealingPolicy, AutoscalingPolicy, FirewallAllowedPorts, \
+        UrlMapHostRule, UrlMapPathMatcher, UrlMapTests, InstanceTemplateDisksProperty, \
+        InstanceTemplateMetadataProperty, InstanceTemplateNetworkInterfaceProperty, \
+        InstanceTemplateSchedulingProperty, InstanceTemplateServiceAccountsProperty, \
+        InstanceTemplateTagsProperty
 
 
 class Address(GCPResource):

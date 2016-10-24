@@ -1,5 +1,10 @@
-from stratosphere.common import ResourceValidators
-from stratosphere.resources import GCPProperty
+try:
+    from stratosphere.common import ResourceValidators
+    from stratosphere.resources import GCPProperty
+except ImportError:
+    # Python2
+    from common import ResourceValidators
+    from resources import GCPProperty
 
 
 class HorizontalPodAutoscalingProperty(GCPProperty):

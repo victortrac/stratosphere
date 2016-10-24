@@ -1,7 +1,12 @@
 import re
 from netaddr import IPNetwork
 
-from stratosphere.utils import get_google_auth
+try:
+    from stratosphere.utils import get_google_auth
+except ImportError:
+    # Python2
+    from utils import get_google_auth
+
 
 class ResourceValidators(object):
     @classmethod

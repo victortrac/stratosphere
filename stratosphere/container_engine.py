@@ -1,7 +1,12 @@
-from stratosphere.common import ResourceValidators
-from stratosphere.resources import GCPResource
-from stratosphere.container_engine_properties import ClusterProperties, NodeConfigProperty, NodePoolAutoScalingProperty
-
+try:
+    from stratosphere.common import ResourceValidators
+    from stratosphere.resources import GCPResource
+    from stratosphere.container_engine_properties import ClusterProperties, NodeConfigProperty, NodePoolAutoScalingProperty
+except ImportError:
+    # Python2
+    from common import ResourceValidators
+    from resources import GCPResource
+    from container_engine_properties import ClusterProperties, NodeConfigProperty, NodePoolAutoScalingProperty
 
 
 class Cluster(GCPResource):

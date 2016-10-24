@@ -11,9 +11,13 @@ import time
 import click
 from googleapiclient import errors
 
-from stratosphere.resources import Template
-from stratosphere.utils import get_google_auth
-
+try:
+    from stratosphere.resources import Template
+    from stratosphere.utils import get_google_auth
+except ImportError:
+    # Python2
+    from resources import Template
+    from utils import get_google_auth
 
 logger = logging.getLogger(__name__)
 dm = get_google_auth('deploymentmanager', 'v2')
