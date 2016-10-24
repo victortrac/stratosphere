@@ -75,9 +75,8 @@ class BaseGCPResource(object):
         # The third field in a property is a validator function or a valid list of values
         if len(self.props[key]) == 3:
             allowed_values = self.props[key][2]
-            if isinstance(value, str):
-                # We turn the string into a set of 1 so we can do set comparison below
-                _value_set = set([value])
+            # We turn the string into a set of 1 so we can do set comparison below
+            _value_set = set([value]) if isinstance(value, str) else set(value)
             # allowed_values is a validator function
             if hasattr(allowed_values, '__call__'):
                 if isinstance(value, list):
