@@ -2,7 +2,7 @@ from stratosphere.resources import Template
 from stratosphere.compute import Firewall, Network, Subnetwork
 from stratosphere.compute_properties import FirewallAllowedPorts
 
-from . import constants
+import constants
 
 
 class Networks(Template):
