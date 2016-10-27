@@ -131,7 +131,7 @@ class ClusterProperties(GCPProperty):
         'addonsConfig': (AddonsConfigProperty, False),
         'subnetwork': (str, True, ResourceValidators.name),
         'nodePools': ([NodePoolProperty], False),
-        'locations': ([str], True, LOCATIONS),
+        'locations': ([str], False, LOCATIONS),
     }
 
     def validator(self):

@@ -107,13 +107,15 @@ def apply_deployment(project, template):
             }
         }
     }
+    result = None
     try:
         deployment = get_deployment(project, template.name)
         if deployment:
             logging.info('Deployment already exists. Getting changes for {}...'.format(template.name))
             body['fingerprint'] = deployment.get('fingerprint')
             changed = False
-            for diff in color_diff(difflib.unified_diff(get_manifest(project, deployment)['config']['content'].splitlines(),
+            existing_template = get_manifest(project, deployment)['config']['content']
+            for diff in color_diff(difflib.unified_diff(existing_template.splitlines(),
                                                         str(template).splitlines(),
                                                         fromfile='Existing template', tofile='Proposed template')):
                 changed = True

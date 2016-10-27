@@ -59,7 +59,7 @@ class GKECluster(Template):
                                     "https://www.googleapis.com/auth/servicecontrol",
                                 ]
                             ),
-                            initialNodeCount=1,
+                            initialNodeCount=cluster.get('node_count'),
                             autoscaling=NodePoolAutoScalingProperty(
                                 enabled=True,
                                 minNodeCount=1,
