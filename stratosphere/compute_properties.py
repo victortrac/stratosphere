@@ -163,7 +163,7 @@ class InstanceTemplateNetworkInterfaceAccessConfigProperty(GCPProperty):
 
 class InstanceTemplateNetworkInterfaceProperty(GCPProperty):
     props = {
-        'accessConfigs': ([InstanceTemplateNetworkInterfaceAccessConfigProperty], True),
+        'accessConfigs': ([InstanceTemplateNetworkInterfaceAccessConfigProperty], False),
         'network': (str, False),  # URL of network
         'subnetwork': (str, False),  # URL of subnetwork
     }
