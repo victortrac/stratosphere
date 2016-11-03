@@ -68,7 +68,7 @@ class BaseGCPResource(object):
         return hasher.hexdigest()
 
     def _set_property(self, key, value):
-        if not value: return
+        if value is None: return
         if key not in self.props.keys():
             type_name = getattr(self, 'resource_type', self.__class__.__name__)
             raise AttributeError('{} object does not support attribute {}'.format(type_name, key))
