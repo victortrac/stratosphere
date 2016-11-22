@@ -16,15 +16,20 @@ class GKECluster(Template):
             'gke_clusters': [
                 {
                     'name': 'my-cluster',
-                    'node_count': 1,
-                    'machine_type': 'n1-standard-1',
-                    'disk_size': 100,
-                    'subnetwork': 'us-central1',
                     'zone': 'us-central1-b',  #  Primary zone
-                    'locations': ['us-central1-a', 'us-central1-b', 'us-central1-c']  #  Additional zones
+                    'subnetwork': 'us-central1',
+                    'locations': ['us-central1-a', 'us-central1-b', 'us-central1-c'], #  Additional zones. Not required.
+                    'nodepools': [
+                        {
+                            'name': 'pool-1',
+                            'node_count': 1,
+                            'machine_type': 'f1-micro',
+                            'disk_size': 20,
+                        }
+                    ]
                 }
             ]
-        },
+        }
     }
 
     https://cloud.google.com/container-engine/reference/rest/v1/projects.zones.clusters/create
@@ -40,10 +45,10 @@ class GKECluster(Template):
                     description='{} {} GKE Cluster'.format(self.env, cluster.get('name')),
                     nodePools=[
                         NodePoolProperty(
-                            name='{}-pool-1'.format(cluster.get('name')),
+                            name='{}-{}'.format(cluster.get('name'), nodepool.get('name')),
                             config=NodeConfigProperty(
-                                machineType=cluster.get('machine_type'),
-                                diskSizeGb=cluster.get('disk_size'),
+                                machineType=nodepool.get('machine_type'),
+                                diskSizeGb=nodepool.get('disk_size'),
                                 oauthScopes=[
                                     "https://www.googleapis.com/auth/bigquery",
                                     "https://www.googleapis.com/auth/bigtable.data",
@@ -59,13 +64,14 @@ class GKECluster(Template):
                                     "https://www.googleapis.com/auth/servicecontrol",
                                 ]
                             ),
-                            initialNodeCount=cluster.get('node_count'),
+                            initialNodeCount=nodepool.get('node_count'),
                             autoscaling=NodePoolAutoScalingProperty(
                                 enabled=True,
                                 minNodeCount=1,
                                 maxNodeCount=3
                             )
                         )
+                        for nodepool in cluster.get('nodepools')
                     ],
                     network='{}-network'.format(self.env),
                     subnetwork='{}-{}-subnetwork'.format(self.env, cluster.get('subnetwork')),
