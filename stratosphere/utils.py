@@ -15,20 +15,23 @@ def get_latest_image(project, name):
     This attempts to return the latest image based on an search string.
     '''
     g = get_google_auth('compute', 'v1')
-    result = g.images().list(project=project).execute()
+
+    # Google puts public images in different projects.
     newest_image = None
-    for image in result.get('items', []):
-        if image['name'].find(name) != -1:
-            if not newest_image:
-                newest_image = image
-            else:
-                if image['creationTimestamp'] > newest_image['creationTimestamp']:
+    for _project in ['centos-cloud', 'coreos-cloud', 'debian-cloud', 'ubuntu-os-cloud', project]:
+        result = g.images().list(project=_project).execute()
+        for image in result.get('items', []):
+            if image['name'].find(name) != -1:
+                if not newest_image:
                     newest_image = image
+                else:
+                    if image['creationTimestamp'] > newest_image['creationTimestamp']:
+                        newest_image = image
 
     if not newest_image:
         raise KeyError("No images found for {}/{}".format(project, name))
 
-    return 'projects/{}/global/images/{}'.format(project, newest_image['name'])
+    return newest_image['selfLink']
 
 
 def load_startup_script(path, replacements=None):

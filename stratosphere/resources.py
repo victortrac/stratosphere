@@ -7,7 +7,7 @@ import json
 logger = logging.getLogger(__name__)
 
 class Template(object):
-    TEMPLATE_TYPE = 'UNDEFINED'  # Need to override this in subclasses
+    TEMPLATE_TYPE = None  # Need to override this in subclasses
 
     def __init__(self, project, env):
         self.project = project
@@ -16,6 +16,9 @@ class Template(object):
         self.resources = []
         self.configured = False
         self.formatter = self.asYAML
+
+        if self.TEMPLATE_TYPE is None:
+            raise NotImplementedError('Must set constant TEMPLATE_TYPE in Template Subclass. Example: network')
 
     @property
     def name(self):

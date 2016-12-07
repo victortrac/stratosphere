@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 dm = get_google_auth('deploymentmanager', 'v2')
 colorama.init()
 
-sys.tracebacklimit = 2
+sys.tracebacklimit = 5
 
 def color_diff(diff):
     for line in diff:
