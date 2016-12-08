@@ -38,7 +38,11 @@ ENV = {
                     }
                 ]
             }
-        ]
+        ],
+        'nfs-server': {
+            'zone': 'us-central1-b',
+            'machine_type': 'n1-standard-1'
+        }
     },
     "prod": {
         "cidr": "10.136.0.0/14",
@@ -63,6 +67,10 @@ ENV = {
                 "region": "asia-east1",
                 "cidr": "10.136.128.0/20"
             }
-        ]
+        ],
+        'nfs-server': {
+            'zone': 'us-central1-b',
+            'machine_type': 'n1-standard-1'
+        }
     }
 }

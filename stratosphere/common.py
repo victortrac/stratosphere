@@ -89,6 +89,7 @@ class ResourceNames(object):
     def zone_to_region(self, zone):
         """Derives the region from a zone name."""
         parts = zone.split('-')
-        if len(parts) != 3:
+        if len(parts) < 2:
             raise Exception('Cannot derive region from zone "%s"' % zone)
         return '-'.join(parts[:2])
+
