@@ -40,10 +40,9 @@ class NFSServer(Template):
         names = ResourceNames(self.project, self.env)
 
         config = constants.ENV[self.env][name]
-        server_name = "{}-{}".format(self.env, name)
 
         instance = Instance(
-            name=server_name,
+            name=name,
             canIpForward=False,
             disks=[
                 InstanceTemplateDisksProperty(
@@ -62,11 +61,11 @@ class NFSServer(Template):
                 InstanceTemplateDisksProperty(
                     autoDelete=False,
                     boot=False,
-                    deviceName=name, # Shows up as /dev/disk/by-id/google-<deviceName>
+                    deviceName=name + '-data',  # Shows up as /dev/disk/by-id/google-<deviceName>
                     source="projects/{project}/zones/{zone}/disks/{disk_name}".format(**{
                         'project': names.project,
                         'zone': config['zone'],
-                        'disk_name': name}),
+                        'disk_name': name + '-data'}),
                     type=InstanceTemplateDisksProperty.PERSISTENT,
                 ),
             ],
@@ -126,8 +125,9 @@ class NFSServer(Template):
                         IPProtocol=FirewallAllowedPorts.ICMP
                     )
                 ],
-                sourceTags=[]
+                sourceRanges=[constants.ENV[self.env]['cidr']]
             )
         ]
 
-        map(self.add_resource, firewall_rules)
+        for rule in firewall_rules:
+            self.add_resource(rule)
