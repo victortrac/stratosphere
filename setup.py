@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='stratosphere',
-    version='0.0.1',
+    version='0.0.2',
     description='Google Cloud Platform Deployment Manager Library & Tool',
     url='https://github.com/victortrac/stratosphere',
     author='Victor Trac',

@@ -268,7 +268,7 @@ class Network(GCPResource):
 
 
 class RegionInstanceGroupManager(GCPResource):
-    resource_type = 'compute.beta.regionInstanceGroupManagers'
+    resource_type = 'compute.beta.regionInstanceGroupManager'
 
     FAILOVER_ACTIONS = ['NO_FAILOVER']
     props = {
