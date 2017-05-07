@@ -1,7 +1,8 @@
 from stratosphere.resources import Template
 from stratosphere.container_engine import Cluster
-from stratosphere.container_engine_properties import ClusterProperties, NodePoolProperty, \
-    NodePoolAutoScalingProperty, NodeConfigProperty
+from stratosphere.container_engine_properties import AddonsConfigProperty, ClusterProperties, \
+    HorizontalPodAutoscalingProperty, HttpLoadBalancingProperty, \
+    NodeManagementProperty, NodePoolProperty, NodePoolAutoScalingProperty, NodeConfigProperty
 
 import constants
 
@@ -42,10 +43,21 @@ class GKECluster(Template):
                 name='{}-{}-cluster'.format(self.env, cluster.get('name')),
                 zone=cluster.get('zone'),
                 cluster=ClusterProperties(
+                    addonsConfig=AddonsConfigProperty(
+                        horizontalPodAutoscaling=HorizontalPodAutoscalingProperty(disabled=False),
+                        httpLoadBalancing=HttpLoadBalancingProperty(disabled=False)
+                    ),
                     description='{} {} GKE Cluster'.format(self.env, cluster.get('name')),
+                    initialClusterVersion='1.6.2',
+                    network='{}-network'.format(self.env),
                     nodePools=[
                         NodePoolProperty(
                             name='{}-{}'.format(cluster.get('name'), nodepool.get('name')),
+                            autoscaling=NodePoolAutoScalingProperty(
+                                enabled=True,
+                                minNodeCount=1,
+                                maxNodeCount=3
+                            ),
                             config=NodeConfigProperty(
                                 machineType=nodepool.get('machine_type'),
                                 diskSizeGb=nodepool.get('disk_size'),
@@ -65,17 +77,15 @@ class GKECluster(Template):
                                 ]
                             ),
                             initialNodeCount=nodepool.get('node_count'),
-                            autoscaling=NodePoolAutoScalingProperty(
-                                enabled=True,
-                                minNodeCount=1,
-                                maxNodeCount=3
+                            management=NodeManagementProperty(
+                                autoUpgrade=True,
+                                autoRepair=True
                             )
                         )
                         for nodepool in cluster.get('nodepools')
                     ],
-                    network='{}-network'.format(self.env),
                     subnetwork='{}-{}-subnetwork'.format(self.env, cluster.get('subnetwork')),
-                    locations=cluster.get('locations'),
+                    locations=cluster.get('locations')
                 )
             )
 

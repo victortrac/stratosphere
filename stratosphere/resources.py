@@ -182,6 +182,16 @@ class GCPResource(BaseGCPResource):
 
 
 class GCPProperty(BaseGCPResource):
+    """
+    GCPProperty is inherited to define properties of resources. 
+    
+    Classes contain at least a props={} that looks something like this:
+    
+    props = {
+        'prop1': (<type>, <required bool>, <optional object or list containining valid values>)
+        ...
+    }
+    """
     def asObject(self):
         return self._toObject()
 

@@ -39,8 +39,8 @@ class AddonsConfigProperty(GCPProperty):
     enabling additional functionality.
     """
     props = {
-        'httpLoadBalancing': (HttpLoadBalancingProperty, False),
-        'horizontalPodAutoscaling': (HorizontalPodAutoscalingProperty, False)
+        'horizontalPodAutoscaling': (HorizontalPodAutoscalingProperty, False),
+        'httpLoadBalancing': (HttpLoadBalancingProperty, False)
     }
 
 
@@ -72,6 +72,18 @@ class NodeConfigProperty(GCPProperty):
     }
 
 
+class NodeManagementProperty(GCPProperty):
+    """
+    NodeManagement defines the set of node management services turned on for the node pool.
+
+    https://cloud.google.com/container-engine/reference/rest/v1/projects.zones.clusters.nodePools#NodePool.NodeManagement
+    """
+    props = {
+        'autoUpgrade': (bool, False),
+        'autoRepair': (bool, False)
+    }
+
+
 class NodePoolAutoScalingProperty(GCPProperty):
     """
     NodePoolAutoscaling contains information required by cluster autoscaler to adjust the size of the node pool to the current cluster usage.
@@ -94,7 +106,8 @@ class NodePoolProperty(GCPProperty):
         'name': (str, True, ResourceValidators.name),
         'config': (NodeConfigProperty, True),
         'initialNodeCount': (int, True),
-        'autoscaling': (NodePoolAutoScalingProperty, False)
+        'autoscaling': (NodePoolAutoScalingProperty, False),
+        'management': (NodeManagementProperty, False)
     }
 
 
@@ -120,18 +133,19 @@ class ClusterProperties(GCPProperty):
     ]
 
     props = {
+        'addonsConfig': (AddonsConfigProperty, False),
+        'clusterIpv4Cidr': (str, False, ResourceValidators.ipAddress),
         'description': (str, False),
+        'initialClusterVersion': (str, False),
         'initialNodeCount': (int, False),
-        'nodeConfig': (NodeConfigProperty, False),
-        'masterAuth': (MasterAuth, False),
+        'locations': ([str], False, LOCATIONS),
         'loggingService': (str, False, LOGGING_SERVICES),
+        'masterAuth': (MasterAuth, False),
         'monitoringService': (str, False, MONITORING_SERVICES),
         'network': (str, False, ResourceValidators.name),  # name of the compute engine network
-        'clusterIpv4Cidr': (str, False, ResourceValidators.ipAddress),
-        'addonsConfig': (AddonsConfigProperty, False),
-        'subnetwork': (str, True, ResourceValidators.name),
+        'nodeConfig': (NodeConfigProperty, False),
         'nodePools': ([NodePoolProperty], False),
-        'locations': ([str], False, LOCATIONS),
+        'subnetwork': (str, True, ResourceValidators.name),
     }
 
     def validator(self):
@@ -143,4 +157,3 @@ class ClusterProperties(GCPProperty):
         if (self.properties.get('initialNodeCount') or self.properties.get('nodeConfig')) \
                 and self.properties.get('nodePools'):
             raise ValueError('nodePools can not be used in with initialNodeCount or nodeConfig.')
-
