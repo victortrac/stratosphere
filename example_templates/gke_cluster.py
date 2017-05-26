@@ -48,7 +48,7 @@ class GKECluster(Template):
                         httpLoadBalancing=HttpLoadBalancingProperty(disabled=False)
                     ),
                     description='{} {} GKE Cluster'.format(self.env, cluster.get('name')),
-                    initialClusterVersion='1.6.2',
+                    #initialClusterVersion='1.6.2',
                     network='{}-network'.format(self.env),
                     nodePools=[
                         NodePoolProperty(
