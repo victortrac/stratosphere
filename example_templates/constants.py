@@ -21,19 +21,31 @@ ENV = {
             {
                 "region": "asia-east1",
                 "cidr": "10.128.128.0/20"
+            },
+            {
+                "region": "asia-northeast1",
+                "cidr": "10.128.160.0/20"
+            },
+            {
+                "region": "asia-southeast1",
+                "cidr": "10.128.192.0/20"
+            },
+            {
+                "region": "us-east4",
+                "cidr": "10.128.224.0/20"
             }
         ],
         'gke_clusters': [
             {
-                'name': 'my-cluster',
+                'name': 'cluster1',
                 'zone': 'us-central1-b',  #  Primary zone
                 'subnetwork': 'us-central1',
                 'locations': ['us-central1-a', 'us-central1-b', 'us-central1-c'],  #  Additional zones. Not required.
                 'nodepools': [
                     {
-                        'name': 'pool-1',
+                        'name': 'pool1',
                         'node_count': 1,
-                        'machine_type': 'f1-micro',
+                        'machine_type': 'g1-small',
                         'disk_size': 20,
                     }
                 ]
@@ -66,6 +78,34 @@ ENV = {
             {
                 "region": "asia-east1",
                 "cidr": "10.136.128.0/20"
+            },
+            {
+                "region": "asia-northeast1",
+                "cidr": "10.136.160.0/20"
+            },
+            {
+                "region": "asia-southeast1",
+                "cidr": "10.136.192.0/20"
+            },
+            {
+                "region": "us-east4",
+                "cidr": "10.136.224.0/20"
+            }
+        ],
+        'gke_clusters': [
+            {
+                'name': 'cluster1',
+                'zone': 'us-central1-b',  #  Primary zone
+                'subnetwork': 'us-central1',
+                'locations': ['us-central1-a', 'us-central1-b', 'us-central1-c'],  #  Additional zones. Not required.
+                'nodepools': [
+                    {
+                        'name': 'pool1',
+                        'node_count': 1,
+                        'machine_type': 'g1-small',
+                        'disk_size': 20,
+                    }
+                ]
             }
         ],
         'nfs-server': {

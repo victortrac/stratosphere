@@ -56,24 +56,28 @@ class GKECluster(Template):
                             autoscaling=NodePoolAutoScalingProperty(
                                 enabled=True,
                                 minNodeCount=1,
-                                maxNodeCount=3
+                                maxNodeCount=20
                             ),
                             config=NodeConfigProperty(
                                 machineType=nodepool.get('machine_type'),
                                 diskSizeGb=nodepool.get('disk_size'),
+                                # see https://developers.google.com/identity/protocols/googlescopes
                                 oauthScopes=[
-                                    "https://www.googleapis.com/auth/bigquery",
-                                    "https://www.googleapis.com/auth/bigtable.data",
-                                    "https://www.googleapis.com/auth/cloud-platform",
+                                    "https://www.googleapis.com/auth/userinfo.email",
                                     "https://www.googleapis.com/auth/compute",
-                                    "https://www.googleapis.com/auth/datastore",
                                     "https://www.googleapis.com/auth/devstorage.read_write",
+                                    "https://www.googleapis.com/auth/taskqueue",
+                                    "https://www.googleapis.com/auth/bigquery",
+                                    "https://www.googleapis.com/auth/datastore",
                                     "https://www.googleapis.com/auth/logging.write",
                                     "https://www.googleapis.com/auth/monitoring",
-                                    "https://www.googleapis.com/auth/projecthosting",
+                                    "https://www.googleapis.com/auth/cloud-platform",
+                                    "https://www.googleapis.com/auth/bigtable.data",
                                     "https://www.googleapis.com/auth/pubsub",
-                                    "https://www.googleapis.com/auth/service.management.readonly",
                                     "https://www.googleapis.com/auth/servicecontrol",
+                                    "https://www.googleapis.com/auth/service.management",
+                                    "https://www.googleapis.com/auth/trace.append",
+                                    "https://www.googleapis.com/auth/source.read_write"
                                 ]
                             ),
                             initialNodeCount=nodepool.get('node_count'),
