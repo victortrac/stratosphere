@@ -64,7 +64,6 @@ class GKECluster(Template):
                                 # see https://developers.google.com/identity/protocols/googlescopes
                                 oauthScopes=[
                                     "https://www.googleapis.com/auth/bigquery",
-                                    "https://www.googleapis.com/auth/bigtable.data",
                                     "https://www.googleapis.com/auth/compute",
                                     "https://www.googleapis.com/auth/cloud-platform",
                                     "https://www.googleapis.com/auth/datastore",

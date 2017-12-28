@@ -8,32 +8,52 @@ ENV = {
             },
             {
                 "region": "us-west1",
-                "cidr": "10.128.32.0/20"
+                "cidr": "10.128.16.0/20"
             },
             {
                 "region": "us-east1",
-                "cidr": "10.128.64.0/20"
+                "cidr": "10.128.32.0/20"
+            },
+            {
+                "region": "us-east4",
+                "cidr": "10.128.48.0/20"
             },
             {
                 "region": "europe-west1",
+                "cidr": "10.128.64.0/20"
+            },
+            {
+                "region": "europe-west2",
+                "cidr": "10.128.80.0/20"
+            },
+            {
+                "region": "europe-west3",
                 "cidr": "10.128.96.0/20"
             },
             {
                 "region": "asia-east1",
+                "cidr": "10.128.112.0/20"
+            },
+            {
+                "region": "asia-south1",
                 "cidr": "10.128.128.0/20"
             },
             {
                 "region": "asia-northeast1",
-                "cidr": "10.128.160.0/20"
+                "cidr": "10.128.144.0/20"
             },
             {
                 "region": "asia-southeast1",
-                "cidr": "10.128.192.0/20"
+                "cidr": "10.128.160.0/20"
             },
             {
-                "region": "us-east4",
-                "cidr": "10.128.224.0/20"
-            }
+                "region": "australia-southeast1",
+                "cidr": "10.128.176.0/20"
+            },
+            {
+                "region": "southamerica-east1",
+                "cidr": "10.128.192.0/20"
+            },
         ],
         'gke_clusters': [
             {
@@ -65,32 +85,52 @@ ENV = {
             },
             {
                 "region": "us-west1",
-                "cidr": "10.136.32.0/20"
+                "cidr": "10.136.16.0/20"
             },
             {
                 "region": "us-east1",
-                "cidr": "10.136.64.0/20"
+                "cidr": "10.136.32.0/20"
+            },
+            {
+                "region": "us-east4",
+                "cidr": "10.136.48.0/20"
             },
             {
                 "region": "europe-west1",
+                "cidr": "10.136.64.0/20"
+            },
+            {
+                "region": "europe-west2",
+                "cidr": "10.136.80.0/20"
+            },
+            {
+                "region": "europe-west3",
                 "cidr": "10.136.96.0/20"
             },
             {
                 "region": "asia-east1",
+                "cidr": "10.136.112.0/20"
+            },
+            {
+                "region": "asia-south1",
                 "cidr": "10.136.128.0/20"
             },
             {
                 "region": "asia-northeast1",
-                "cidr": "10.136.160.0/20"
+                "cidr": "10.136.144.0/20"
             },
             {
                 "region": "asia-southeast1",
-                "cidr": "10.136.192.0/20"
+                "cidr": "10.136.160.0/20"
             },
             {
-                "region": "us-east4",
-                "cidr": "10.136.224.0/20"
-            }
+                "region": "australia-southeast1",
+                "cidr": "10.136.176.0/20"
+            },
+            {
+                "region": "southamerica-east1",
+                "cidr": "10.136.192.0/20"
+            },
         ],
         'gke_clusters': [
             {
